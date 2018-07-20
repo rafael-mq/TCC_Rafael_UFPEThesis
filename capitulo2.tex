@@ -1,4 +1,41 @@
 \chapter{Referencial Teórico}
-
 \section{Iluminação de LED}
 \subsection{LED}
+
+\subsection{Ergonomia da Iluminação}
+
+A ergonomia é o estudo científico das relações homem e máquina no ambiente de trabalho, visando segurança e eficiência na interação entre estes. A norma regulamentadora que trata de ergonomia, a NR 17, traz orientações sobre luminosidade no ambiente de trabalho com o objetivo de proteger a saúde física e psicológica do trabalhador. Algumas das orientações da norma técnica \cite{nr}:
+
+\begin{labeling}{17.5.3.3}
+    \item[17.5.3] Em todos os locais de trabalho deve haver iluminação adequada, natural ou artificial, geral ou suplementar, apropriada à natureza da atividade.\\
+    \item[17.5.3.1]  A iluminação geral deve ser uniformemente distribuída e difusa.\\
+    \item[17.5.3.2] A iluminação geral ou suplementar deve ser projetada e instalada de forma a evitar ofuscamento, reflexos incômodos, sombras e contrastes excessivos.\\
+    \item[17.5.3.3] Os níveis mínimos de iluminamento a serem observados nos locais de trabalho são os valores de iluminâncias estabelecidos na NBR 5413, norma brasileira registrada no INMETRO.
+\end{labeling}
+
+A NBR ISO/CIE 8995-1  substituiu a NBR 5413 e especifica condições de iluminação para ambientes de trabalho internos e visa a eficiência na execução de tarefas visuais com eficiência, conforto e segurança durante todo o tempo de trabalho, seja esta iluminação natural, artificial ou uma combinação de ambas. A fim de atingir esse objetivo vários critérios são levados em conta, entre eles estão: aspectos da cor da luz, cintilação e iluminância.
+
+Esta legislação estabelece os valores de iluminâncias médias mínimas em serviço para iluminação artificial em interiores, onde se realizem atividades de comércio, indústria, ensino, esporte e outras. Estes valores estão condicionados a função do trabalhador e tempo de determinada tarefa. A iluminância é uma grandeza de luminosidade representada pela letra E, sua unidade de medida é o “lux”, para medí-la utiliza-se o luxímetro, e é definida como  "limite da razão do fluxo luminoso recebido pela superfície em torno de um ponto considerado, para a área da superfície quando esta tende para o zero." (NBR 8995-1, 2013).  A iluminância pode impactar em como uma pessoa percebe e realiza uma tarefa visual, de forma que altos valores de iluminância causam desconforto e ofuscamento e baixos valores tornam o ambiente de trabalho sem estímulo e tedioso.
+
+%A cintilação e efeitos estroboscópicos são causado pelo chaveamento frequente ou oscilação da iluminância em função de aspectos elétricos da iluminação e pode provocar distração e efeitos fisiológicos como dores de cabeça. Podem ainda levar a situações de risco pela alteração da percepção de máquinas de rotação sincronizadas com a frequência de oscilação da iluminância. Este efeito é análogo ao de ver, em filmagens, a roda de um carro em movimento que parece estar girando devagar ou estar parada; o mesmo pode acontecer em uma fábrica com uma máquina síncrona iluminada por uma fonte de luz alimentada pela mesma rede elétrica que alimenta a máquina.%
+
+\section{Internet das Coisas}
+
+Ao longo da história, vários pensadores, cientistas e inventores fizeram previsões convergentes para o futuro, previsões de que um dia o mundo teria uma rede interconectada de computadores e sensores. Hoje vemos essas previsões tomarem forma e podemos vislumbrar esse futuro imaginado por grandes mentes do passado. Nikolas Tesla disse certa vez em uma entrevista em 1926: “... o planeta inteiro se tornará um cérebro gigante, o que significa que todas as coisas serão partes reais e harmônicas de um todo… e os instrumentos que nos permitirão realizar isso serão incrivelmente mais simples que os telefones atuais. Qualquer homem será capaz de carregar um seu próprio bolso”. Já o primeiro dispositivo cotidiano a se conectar a internet foi uma torradeira criada por John Romkey em 1990 e que se conectava a um computador pela pilha de protocolos TCP/IP (\acl{TCP} / \acl{IP}) podendo ser ligada ou desligada pela internet.
+
+Tecnologias correlatas a \ac{IoT} vêm sendo adotadas, nos últimos anos, por empresas de todos os portes e abrindo espaço para novos empreendimentos. Não há restrições claras para os limites de aplicações para \ac{IoT}; aliada a outra importante tecnologia que vem sendo extensivamente explorada, a inteligência artificial, a \ac{IoT} consegue prover vantagens como aumento de produtividade, extrema versatilidade na obtenção de dados e redução de despesas. Um exemplo interessante é a aplicação de dispositivos conectados à rede na produção do leite \cite{milk} na qual produtores têm colocado sensores nos calcanhares, pescoço, mamas e intestino das vacas para prever com exatidão os ciclos férteis dos animais, medir a qualidade do leite antes de extraí-lo e monitorar a saúde da vaca.
+
+O mercado de \ac{IoT} pode ser separado em aplicações de consumo, da indústria e de serviços de infraestrutura da própria internet das coisas. O ramo voltado ao consumidor amplo é caracterizado principalmente por aplicações domiciliares como sistemas de segurança conectados e automação residencial, além de dispositivos vestíveis como monitores de sinais biológicos e relógios “inteligentes”. O setor industrial faz uso da internet das coisas em soluções de logística, agropecuária, sensoriamento em geral, planejamento urbano, monitoramento da rede elétrica, e vários outros exemplos. Por outro lado, para possibilitar que todos esse serviços de \ac{IoT} existam, há várias plataformas de infraestrutura de rede, sistemas embarcados, plataformas de software e serviços de armazenamento e análise de dados. Gigantes da tecnologia como “\textit{Google}”, “\textit{Microsoft}” e “\textit{Amazon}” têm setores totalmente voltado para \ac{IoT} e serviço de nuvem como o “\textit{Google Cloud}”, o “\textit{Microsoft Azure}” e o “\textit{Amazon Web Services}”.
+
+\subsection{Redes de Computadores}
+
+A comunhão dos computadores e das comunicações foi uma das principais revoluções tecnológicas modernas dando origem ao campo de redes de computadores com a demanda de organizar a comunicação entre computadores e criar sistemas computacionais para fazer essa comunicação.
+
+Diz-se que uma rede de computadores é definida por dois ou mais computadores que, interligados por um meio físico, são capazes de trocar dados \cite{redes}. O conceito não especifica qual o meio físico que interliga os computadores que pode ser cabos metálicos, fibras óticas, micro-ondas, ondas de infravermelho; mas limita o meio a apenas um tipo, de forma que a “ampla rede mundial” (\textit{World Wide Web}) não é uma rede mas uma “rede de redes” e que a internet não é uma rede, e sim um sistema distribuído que, apesar de ser composto por vários computadores, é um sistema de softwares que opera sobre a rede e que dá a impressão ao usuário de ser um sistema coerente, uma rede não apresenta essa coerência aparente.
+
+A \textit{World Wide Web} funciona de acordo com o modelo de cliente/servidor no qual um serviço cliente interage na rede por solicitações ao serviço servidor que responde a essas solicitações, podemos dizer também que o servidor provê recursos que os clientes consomem.
+
+\subsection{A tecnologia \ac{WiFi}}
+
+A popularização de computadores pessoais portáteis (notebooks) trouxe consigo a demanda que o acesso à internet se tornasse, também, móvel e assim foram desenvolvidas algumas arquiteturas de rede baseadas em ondas eletromagnéticas. A existência de diversos tipos de conexão sem fio (wireless) evidenciou a necessidade de uma padronização e assim o \ac{IEEE} lançou o padrão “802.11” para redes locais \cite{wifi} com uma série de especificação de controle de acesso ao meio (MAC) e camada física nas frequências de 900 MHz, 2.4, 3.6, 5 e 60 GHz com larguras de banda mais usuais de 20 ou 22 MHz e taxas de 1 até 3500 MB/s. Diversas revisões subsequentes do padrão como “a”, “b”, “g”, “n” especificam frequência, largura de banda, modulação entre outros fatores; a maioria dos dispositivos com internet sem fio é versátil para trabalhar com múltiplos modelos do padrão.
+A \acf{WiFi} é uma marca da Wi-Fi Alliance, organização que promove a tecnologia e certifica produtos que obedecem a alguns requisitos de interoperabilidade do padrão \ac{IEEE} 802.11.
