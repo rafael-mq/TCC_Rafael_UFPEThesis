@@ -28,6 +28,11 @@
 %% (re)definições de macros, medidas, etc.
 
 \usepackage{indentfirst}
+\usepackage{setspace}
+\usepackage{suffix}
+\usepackage[withpage]{acronym} % optional command: printonlyused
+
+\onehalfspacing
 
 %% Identificação:
 
@@ -152,7 +157,11 @@ Não sou obrigado a vencer, mas tenho o dever de ser verdadeiro. Não sou obriga
 % Comente para ocultar
 \listoftables
 
-
+\chapter*{Lista de Siglas}
+\begin{acronym}[MQTT]
+    \acro{MQTT}{\textit{Message Queue Telemetry Transport}}
+    \acro{WiFi}{\textit{Wireless Fidelity}}
+\end{acronym}
 
 %%
 %% Parte textual
@@ -163,7 +172,7 @@ Não sou obrigado a vencer, mas tenho o dever de ser verdadeiro. Não sou obriga
 % "capitulo1.tex", "capitulo2.tex", ... "capituloN.tex" e depois
 % incluí-los com:
 \include{capitulo1}
-% \include{capitulo2}
+\include{capitulo2}
 % ...
 % \include{capituloN}
 
@@ -176,7 +185,7 @@ Não sou obrigado a vencer, mas tenho o dever de ser verdadeiro. Não sou obriga
 
 % Apêndices
 % Comente se não houver apêndices
-\appendix
+%\appendix
 
 % É aconselhável criar cada apêndice em um arquivo à parte, digamos
 % "apendice1.tex", "apendice.tex", ... "apendiceM.tex" e depois
