@@ -29,6 +29,7 @@
 
 \usepackage{indentfirst}
 \usepackage{setspace}
+\usepackage{url}
 \usepackage{scrextend}
 \addtokomafont{labelinglabel}{\sffamily}
 \usepackage{suffix}
@@ -159,17 +160,7 @@ Não sou obrigado a vencer, mas tenho o dever de ser verdadeiro. Não sou obriga
 % Comente para ocultar
 \listoftables
 
-\chapter*{Lista de Siglas}
-\begin{acronym}[MQTT]
-    \acro{IEEE}{\textit{Institute of Electrical and Electronics Engineers}}
-    \acro{IoT}{\textit{Internet of Things}}
-    \acro{IP}{\textit{Internet Protocol}}
-    \acro{LED}{\textit{Light Emitting Diode}}
-    \acro{MAC)}{\textit{Media Access Control}}
-    \acro{MQTT}{\textit{Message Queue Telemetry Transport}}
-    \acro{TCP}{\textit{Transmission Control Protocol}}
-    \acro{WiFi}{\textit{Wireless Fidelity}}
-\end{acronym}
+\include{siglas}
 
 %%
 %% Parte textual
@@ -178,13 +169,10 @@ Não sou obrigado a vencer, mas tenho o dever de ser verdadeiro. Não sou obriga
 
 % É aconselhável criar cada capítulo em um arquivo à parte, digamos
 % "capitulo1.tex", "capitulo2.tex", ... "capituloN.tex" e depois
-% incluí-los com:
-\include{capitulo1}
-\include{capitulo2}
-% ...
-% \include{capituloN}
-
-
+% incluí-los:
+\include{intro}
+\include{teoria}
+\include{metod}
 
 %%
 %% Parte pós-textual
@@ -209,8 +197,8 @@ Não sou obrigado a vencer, mas tenho o dever de ser verdadeiro. Não sou obriga
 % Para ajuda na criação do arquivo .bib e utilização do BibTeX, recorra ao
 % BibTeXpress em www.cin.ufpe.br/~paguso/bibtexpress
 \nocite{*}
-\bibliographystyle{alpha}
-\bibliography{sample}
+\bibliographystyle{ieeetr}
+\bibliography{biblio}
 
 % Cólofon
 % Inclui uma pequena nota com referência à UFPEThesis

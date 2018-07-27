@@ -1,0 +1,72 @@
+\chapter{Materiais e Métodos}
+
+\section{Metodologia}
+blablabla
+
+\section{Materiais e Montagem}
+
+A descrição dos elementos físicos usados no projeto da lâmpada inteligente pode ser resumida pelo esquema geral do projeto na %REFERENCIA DA FIGURA DO ESQUEMA GERAL%.
+
+% FIGURA DO ESQUEMA GERAL
+
+\subsection{Alimentação}
+
+A fonte de alimentação elétrica do projeto é uma fonte comercial de 12V/1A de padrão comercial “\textit{bivolt}” com plugue P4. %REFERENCIA DA FIGURA DA FONTE%
+Os 12V fornecidos pela fonte serão partilhados pela fonte de iluminação e pelo sistema embarcado. Um regulador baseado no CI AMS1117 será usado para transformar os 12V da fonte em 5V para alimentar o sistema com o microcontrolador. Esse regulador têm sua tensão de saída fixa em 5V e apresenta algumas funcionalidades como limitador interno de corrente e auto-desligamento térmico, e com o arrefecimento adequado ele pode fornecer até 1A que já é mais que o suficiente para o ESP-8266 que consome em torno de 220 mA durante curtos períodos quando está transmitindo via WiFi.
+
+
+\subsection{Módulo Microcontrolador}
+
+Como mencionado, o microcontrolador escolhido para o projeto é o ESP-8266 que inclui capacidade de comunicação WiFi. A própria fabricante do CI comercializa alguns módulos que facilitam o desenvolvimento com o ESP-8266 com antenas, LED, memória \textit{flash} e outros periféricos. Um desses módulos, o ESP-12 é usado por diversas empresas para fabricarem seus kits de desenvolvimento com ainda mais facilidades para o desenvolvedor. O kit usado neste projeto é “\textit{Wemos D1 Mini}” %REFERENCIA DA FIGURA DO D1 MINI%
+que conta com conversor USB-serial, regulador de tensão para transformar os 5V DC provenientes da porta "USB" ou da alimentação externa para os 3.3V DC que o ESP-8266 demanda, oscilador, botão para \textit{reset} e conectores para os pinos de entrada e saída.
+
+%FIGURA DO D1 MINI%
+
+\begin{table}
+    \centering
+    \label{wemos_dados}
+    \caption{Especificações do kit \textit{Wemos D1 Mini}}
+    \begin{tabular}{ll} 
+        \hline
+        Kit de desenvolvimento          & Wemos D1 Mini  \\ 
+        \hline
+        SoC                             & ESP-8266       \\ 
+        \hline
+        Pinos de I/O digitais           & 11             \\ 
+        \hline
+        Entradas analógicas             & 1 (3,2V máx)   \\ 
+        \hline
+        Clock                           & 80 MHz         \\ 
+        \hline
+        Memória \textit{flash}          & 4 MB           \\
+        \hline
+    \end{tabular}
+\end{table}
+
+O pino de entrada analógica do módulo usado tem uma tensão máxima especificada de 3,2V, apesar de a tensão máxima de entrada do ESP-8266 ser de 1V segundo suas características elétricas \cite{esp}. Isto se deve ao fato de o módulo "\textit{Wemos D1 Mini}" apresentar um divisor de tensão conectado ao pino de entrada analógica do SoC fazendo com que a tensão aplicada a este pino seja mapeada de um intervalo de, 0 a 3,2V no devido pino do módulo, para um intervalo de 0 a 1V no pino do ESP-8266.
+
+\subsection{Sensor de Luminosidade}
+
+O sensor de luminosidade %REFERENCIA DA FIGURA DO LDR%
+é um "fotoresistor" ou \acf{LDR} cuja resistência, geralmente, diminui com o aumento da intensidade luminosa linearmente. Geralmente são materiais semicondutores de alta resistividade, mas que quando expostos à luz, têm elétrons liberados em sua camada de condução aumentando assim sua condutividade. Existem LDRs sensíveis a faixas de radiação ultravioleta, infravermelho e a luz visível, que são os mais comuns.
+
+%FIGURA DO LDR%
+
+%falar do ldr usado%
+
+\subsection{Fita de LED}
+A fonte de iluminação é uma fita de LED que consiste de elementos de três LEDs e um resistor em série para limitar a corrente, com vários desses elementos ligados em paralelo. Essa ligação permite que todos os elementos sejam submetidos à mesma tensão e que a fita possa ser cortada em determinados pontos e continue funcionando.
+
+%FIGURA DA FITA DE LED%
+
+A fita de LED adquirida para o projeto tem as seguintes especificações:
+
+%TABELA DE CARACTERISTICAS DA FITA DE LED%
+
+O controle da luminosidade será feito por chaveamento da alimentação da fita de LED com \acf{PWM}, técnica que permite controlar digitalmente a potência entregue a atuadores ao determinar a parcela do período em nível lógico alto, de um sinal alternado. O microcontrolador irá chavear um transistor darlington “TIP122” \cite{tip122}.
+
+\section{Programação e Ferramentas}
+
+\subsection{\textit{Broker} MQTT}
+
+O \textit{broker}, ou servidor, MQTT responsável pelo controle das mensagens intercambiadas na rede será o \textit{broker} da "\textit{Adafruit}". O serviço oferecido pela \textit{Adafruit} conta com um  \textit{broker} MQTT configurado com níveis de QoS 0 e 1, 
