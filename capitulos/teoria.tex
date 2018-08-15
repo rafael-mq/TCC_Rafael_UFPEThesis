@@ -22,10 +22,15 @@ Eletroluminescência é definida como a emissão de luz por um material semicond
 
 A recombinação dos pares elétron-buraco libera energia pelo fato dos elétrons passarem para um nível menos energético \cite{rezende}. Uma vasta gama de materiais semicondutores apresenta uma estrutura de bandas de energia chamada de banda de "gap" indireto, e isso significa em resumo que a transição de elétrons entre os níveis energéticos não envolve apenas emissão ou absorção de luz (fótons), envolve também energia vibratória que gera calor (fônons). Alguns outros materiais têm o que se chama de banda de "gap" direta e a emissão de luz no caso desse tipo de material é bem mais eficiente que nos materiais de "gap" indireto. O comprimento de onda dos fótons emitidos está relacionado com energia de "gap" de forma que LEDs de diferentes materiais semicondutores emitem luz de cores distintas desde o infra-vermelho próximo até o ultra-violeta próximo. A famosa equação de \textit{Plank} demonstra a relação
 
+\begin{equation}
+    \label{eq:led_1}
+    v = \frac{c}{\lambda}
+\end{equation}
 
-    $$  E_g = h.v $$
-    $$  v = \frac{c}{\lambda} $$
-    $$  E_g = \frac{h.c}{\lambda} .$$
+\begin{equation}
+    \label{eq:led_2}
+    E_g = h.v = \frac{h.c}{\lambda}
+\end{equation}
     
 Onde "h" é a constante de \textit{Plank} e "c" é a velocidade da luz. A energia de "gap" e o comprimento de onda são, como visto, inversamente proporcionais e temos que para o extremo vermelho do espectro visível com comprimento de onda de 700nm requer um material com energia de "gap" de 1.77eV enquanto a energia necessária para obter o violeta extremo, em 400nm, é de 3.1eV. Abaixo vemos um quadro com as energias de "gap" e comprimento de onda característicos de alguns materiais semicondutores.
 
@@ -150,13 +155,13 @@ Ao usar o nível de QoS 1, um cliente que envia uma mensagem ao broker, ou o inv
 
 O nível mais alto de QoS, 2, é o que provê mais previsibilidade e envolve a maior quantidade de troca de informações na troca de uma mensagem. Esse nível apresenta confirmação de recebimento e confirmação de recebimento da confirmação. A maioria de serviços de MQTT baratos ou grátis, para testes e "hobbistas", não dão suporte ao QoS de nível 2.
 
-\section{Sistemas Embarcados}
+% \section{Sistemas Embarcados}
 
-Uma definição sucinta de sistema é um conjunto de processos ou mesmo sistemas conectados que realizam uma ou mais tarefas como um todo. Como o nome sugere um sistema embarcado é um sistema eletrônico que faz parte de um sistema maior com a função de, muitas vezes, controlar, interfacear, observar outros sistemas eletrônicos ou não. É um programa computacional, ou \textit{software}, que é executado por um sistema físico, o \textit{hardware}, de capacidades adequadas ou projetadas para a tarefa a ser executada, diferente de computadores pessoais, de propósito geral, que possuem capacidade de executar uma grande variedade de tarefas à demanda do usuário.
+% Uma definição sucinta de sistema é um conjunto de processos ou mesmo sistemas conectados que realizam uma ou mais tarefas como um todo. Como o nome sugere um sistema embarcado é um sistema eletrônico que faz parte de um sistema maior com a função de, muitas vezes, controlar, interfacear, observar outros sistemas eletrônicos ou não. É um programa computacional, ou \textit{software}, que é executado por um sistema físico, o \textit{hardware}, de capacidades adequadas ou projetadas para a tarefa a ser executada, diferente de computadores pessoais, de propósito geral, que possuem capacidade de executar uma grande variedade de tarefas à demanda do usuário.
 
-Os sistemas embarcados são parte de fundamental da maioria dos sistemas eletrônicos usados atualmente por apresentar padronização de comunicação entre estas unidades, facilidade e simplicidade de processamento de sinais e consumo de energia otimizado. Uma característica importante de sistemas embarcados é que existem arquiteturas dos mais variados tipos, que são especificados para executar os mais variados tipos de tarefas: desde arquiteturas que suportam sistemas operacionais complexos para processamento de imagens em tempo real, até arquiteturas simples com poucos transistores e outros componentes que realizam tarefas como ligar uma lâmpada ou contar tempo.
+% Os sistemas embarcados são parte de fundamental da maioria dos sistemas eletrônicos usados atualmente por apresentar padronização de comunicação entre estas unidades, facilidade e simplicidade de processamento de sinais e consumo de energia otimizado. Uma característica importante de sistemas embarcados é que existem arquiteturas dos mais variados tipos, que são especificados para executar os mais variados tipos de tarefas: desde arquiteturas que suportam sistemas operacionais complexos para processamento de imagens em tempo real, até arquiteturas simples com poucos transistores e outros componentes que realizam tarefas como ligar uma lâmpada ou contar tempo.
 
-\subsection{Microcontroladores}
+\section{Microcontroladores}
 
 Microcontroladores são sistemas embarcados cuja função é a de controlar o sistema do qual fazem parte. Dentro da classe de sistemas dedicados estão os microcontroladores que são compostos, em geral, por uma unidade central de processamento (CPU), memória não-volátil para dados e instruções, memória volátil de acesso aleatório (RAM), oscilador e periféricos que geram entradas ou recebem saídas do processador como contadores, \textit{timers}, módulos de comunicação seriais e paralelos, conversores analógicos e digitais . Microcontroladores estão presentes em quase todos equipamentos eletrônicos que se possa imaginar: a indústria de eletrônica de consumo e a indústria automobilística fazem uso extensivo de microcontroladores.
 
@@ -180,7 +185,7 @@ O ESP-8266 \cite{esp} é um \acf{SoC} com capacidade de comunicação \ac{WiFi} 
     \label{esp8266}
 \end{figure}
 
-O ESP8266 possui interfaces "UART", "I2C" (apenas a função de mestre implementada em suas bibliotecas de desenvolvimento de \textit{software} oficial, mas há implementações para escravo I2C da comunidade), "SPI" (com três pinos de \textit{device enable} além dos outros pinos usuais do protocolo). Possui 16 pinos de uso geral podendo ser configurados com pull-up/down internos, interrupção por nível ou borda em seus pinos de entrada e saída, opção configurável de saída open-drain ou push-pull, ou ainda saída analógica de PWM com resolução de 10 bits em qualquer pino e uma entrada analógica (ADC). Seus pinos possuem proteção contra sobrevoltagem de até 5,8 V e conseguem fornecer até 12 mA de corrente cada um.
+O ESP8266 possui interfaces "UART", "I2C" (apenas a função de mestre implementada em suas bibliotecas de desenvolvimento de \textit{software} oficiais, mas há implementações para escravo I2C da comunidade), "SPI" (com três pinos de \textit{device enable} além dos outros pinos usuais do protocolo). Possui 16 pinos de uso geral podendo ser configurados com pull-up/down internos, interrupção por nível ou borda em seus pinos de entrada e saída, opção configurável de saída open-drain ou push-pull, ou ainda saída analógica de PWM com resolução de 10 bits em qualquer pino e uma entrada analógica (ADC). Seus pinos possuem proteção contra sobrevoltagem de até 5,8 V e conseguem fornecer até 12 mA de corrente cada um.
 
 \begin{figure}[ht]
     \begin{center}
@@ -191,3 +196,193 @@ O ESP8266 possui interfaces "UART", "I2C" (apenas a função de mestre implement
 \end{figure}
 
 A \textit{Espressif} comercializa diferentes módulos baseados no ESP8266, numerados de 1 até 12, que facilitam o desenvolvimento e a produção de produtos por já integrar circuitos ou chips de antena, sistema de alimentação e outros circuitos com o seu SoC. O ESP-01, por exemplo, possui apenas oito pinos, sendo dois deles "VCC" e "GND", e foi desenvolvido para ser usado como um simples modulo WiFi-serial. O ESP-12F possui os 16 GPIOs disponíveis e uma memória flash externa de 4MB "SPI". Esse módulo é usado na maioria das plataformas de desenvolvimento do ESP-8266, como o “\textit{NodeMCU}” e o “\textit{Wemos D1 Mini}”. Estas plataformas possuem recursos que facilitam o desenvolvimento como interface USB-serial, botão de \textit{reset} e conectores apropriados para \textit{protoboards}.
+
+\section{Cálculo de Energia}
+
+Comumente sistemas embarcados precisam prover saídas analógicas mas pode ser inviável acoplar um conversor digital-analógico. A principal solução para essa limitação é o uso da chamada "Modulação por Largura de Pulso" (PWM) que é caracterizada por controlar a intensidade ou potência média de um sinal digital pulsado por meio do seu tempo ativo, ou ciclo ativo. A potência média de um sinal contínuo periódico pode ser definida na equação \ref{eq:en_1}.
+
+\begin{equation}
+\label{eq:en_1}
+P(t) = \frac{1}{T} \int_{t}^{t+T}x^2(t')dt'
+\end{equation}
+
+\noindent onde T é o período e $x(t)$ é o sinal digital de potência pulsado tal que
+
+\begin{equation}
+    \label{eq:en_2}
+    x(t) =  \left\{
+            \begin{array}{ll}
+                1 \quad ; \quad nT \leq t < nT+\alpha T \\
+                0 \quad ; \quad nT+\alpha T \leq t < (n+1)T\\
+            \end{array}
+            \right.
+\end{equation}
+
+\noindent com $n = 0, 1, 2, 3, ...$ e $\alpha$ é a porção do período no qual o sinal tem valor digital alto, tal que $0 \leq \alpha < 1$. Avaliando a potência média deste sinal temos que 
+
+\begin{equation}
+    \label{eq:en_3}
+    P(t) = \frac{1}{T} \int_{nT}^{(n+1)T}x(t')dt' = \frac{1}{T} \int_{nT}^{nT+\alpha T}dt' = \frac{1}{T}.\alpha T
+\end{equation}
+
+\begin{equation}
+    \label{eq:en_4}
+    P(t) = \alpha
+\end{equation}
+
+A equação \ref{eq:en_4} mostra que a potência média do sinal de potência normalizado de PWM é igual ao ciclo ativo. Portanto, para um sinal de potência máxima $P_{max}$ controlado por PWM com ciclo ativo variável no tempo, temos que sua potência média no tempo é
+
+\begin{equation}
+    \label{eq:en_5}
+    P(t) = \alpha(t)P_{max}
+\end{equation}
+
+A energia de um sinal de potência é simplesmente a integral da potência ao longo do tempo
+
+\begin{equation}
+    \label{eq:en_6}
+    E(t) = \int_{0}^{t}P(t')dt'
+\end{equation}
+
+\section{Controle}
+
+Uma das principais aplicações de sistemas embarcados é a de controlar uma ou mais saídas de um processo. São incontáveis as aplicações em que são empregados, como controle de velocidade de automóveis, regulagem de temperatura e, no caso deste projeto, controle de iluminação. 
+
+Os elementos básicos de um sistema de controle são o sistema ou processo a ser controlado e o controlador. Os sistemas de controle podem ser classificados como malha fechada e aberta. Os sistemas de malha fechada são os que têm a sua saída medida e comparada com a referência de controle servindo como base para o controlador aplicar suas ações. A comparação entre o valor medido da saída e o valor de referência é chamado de erro e é tomado como entrada para o controlador, cujo objetivo é sempre o de minimizar o erro. Sistemas de malha aberta não fazem observações da saída para aplicar as ações de controle.
+
+\begin{figure}[ht]
+    \begin{center}
+    \includegraphics[width=0.8\textwidth]{figuras/malha.JPG}
+    \end{center}
+    \caption[Diagrama de blocos um sistema de controle de malha fechada.]{Diagrama de blocos de um sistema de controle de malha fechada.}
+    \label{malha}
+\end{figure}
+
+\subsection{Tempo Discreto e Transformada Z}
+
+Existem dois tipos de abordagens para o modelamento de sistemas de controle no que se refere à forma como se lida com o tempo, contínuo ou discreto. Sistemas microcontrolados, baseados em programas computacionais com ciclos de execução atrelados ao temporizador do controlador, são adequados para a implementação de sistemas de controle em tempo discreto. A abordagem de controle em tempo discreto, também chamado de controle digital, leva em conta que para operar num cenário de tempo e outras grandezas contínuas, o sistema digital precisa amostrar as grandezas em intervalos discretos de tempo e ajustar o valor das amostras para a representação digital (quantização). 
+
+\begin{figure}[ht]
+    \begin{center}
+    \includegraphics[width=0.7\textwidth]{figuras/discreto.PNG}
+    \end{center}
+    \caption[Diagrama de um sistema de processamento em tempo discreto.]{Diagrama de um sistema de processamento em tempo discreto de sinais contínuos.}
+    \label{disc}
+\end{figure}
+
+Apesar de na maioria dos casos de aplicação de controle digital a planta e a entrada serem contínuas, em alguns casos é pertinente a discretização da planta e da referência de controle o que torna possível, portanto, modelar todo o sistema de controle em tempo discreto. Assim como os sistemas de tempo contínuo podem ser analisados no domínio da frequência por meio da transformada de Laplace, o caso análogo no caso de sistemas de tempo discreto é a transformada Z. Para um sinal $x[n]$ causal temos que sua transformada Z é
+
+\begin{equation}
+    \label{eq:cd_1}
+    X(z) = Z\{x[n]\} = \sum_{n=0}^{\infty} x[n].z^{-n} 
+\end{equation}
+
+\begin{figure}[ht]
+    \begin{center}
+    \includegraphics[width=0.7\textwidth]{figuras/condig.PNG}
+    \end{center}
+    \caption[Diagrama da malha fechada de controle digital.]{Diagrama da malha fechada de controle digital. Os blocos têm sua função expressa na transformada Z.}
+    \label{condig}
+\end{figure}
+
+Para o sistema de controle da Figura \ref{condig}, onde $C(z)$ e $P(z)$ sâo as funções de transferência do controlador e da planta, respectivamente, temos que
+
+\begin{equation}
+    \label{eq:cd_2}
+    e[n] = x[n] - y[n-1]
+\end{equation}
+
+\begin{equation}
+    \label{eq:cd_3}
+    E(z) = X(z) - z^{-1}Y(z)
+\end{equation}
+
+\begin{equation}
+    \label{eq:cd_4}
+    Y(z) = C(z).P(z).E(z)
+\end{equation}
+
+\begin{equation}
+    \label{eq:cd_5}
+    H(z) = \frac{Y(z)}{X(z)} = \frac{C(z)P(z)}{1+z^{-1}C(z)P(z)}
+\end{equation}
+
+\subsection{PID Digital}
+
+O controle PID (Proporcional Integral Derivativo) é largamente utilizado como controlador por seu desempenho satisfatório e relativa simplicidade de implementação. Ele consiste da soma de três componentes, uma proporcional ao erro, um componente integrativa do erro e uma componente derivativa do erro Sua modelagem em tempo discreto pode ser vista a seguir. A componente proporcional do erro é simplesmente
+
+\begin{equation}
+    \label{eq:cd_6}
+    u_p[n] = K_pe[n]
+\end{equation}
+
+\begin{equation}
+    \label{eq:cd_6.1}
+    U_p(z) = K_pE(z)
+\end{equation}
+
+O controle integral é baseado na aproximação da integração do erro ao longo do tempo. Dentre as estratégias de aproximação da integração de sinais existentes, a mais comum é a trapezoidal que calcula a área do sinal entre duas amostras consecutivas como a área do trapézio caracterizado pelos valores das amostras, "$e[n]$" e "$e[n-1]$", como a base maior e a menor, e o tempo de amostragem "$T_s$" como sua altura.
+
+\begin{equation}
+    \label{eq:cd_7}
+    A[n] = \frac{T_s}{2} (e[n]+e[n-1])
+\end{equation}
+
+Portanto o valor da integração do sinal de controle é
+
+\begin{equation}
+    \label{eq:cd_8}
+    u_i[n] = u_i[n-1] + \frac{T_s}{2} (e[n]+e[n-1])
+\end{equation}
+
+
+\begin{equation}
+    \label{eq:cd_8.1}
+    U_i(z) = z^{-1}U_i(z) + \frac{K_iT_s}{2} (E(z)+z^{-1}E(z))
+\end{equation}
+
+\begin{equation}
+    \label{eq:cd_8.2}
+    U_i(z) =\frac{K_iT_sE(z)}{2} \frac{(1+z^{-1})}{(1-z^{-1})}
+\end{equation}
+
+Por fim, a parcela derivativa do sinal de controle é
+
+\begin{equation}
+    \label{eq:cd_9}
+    u_d[n] = \frac{K_d(e[n]-e[n-1])}{T_s}
+\end{equation}
+
+\begin{equation}
+    \label{eq:cd_9.1}
+    U_d(z) = \frac{K_dE(z)}{T_s} (1-z^{-1})
+\end{equation}
+
+Somando-se as parcelas proporcional, integral e derivativa
+
+\begin{equation}
+    \label{eq:cd_10}
+    U(z) = U_p(z) + U_i(z) + U_d(z) = E(z)\left(K_p+\frac{K_iT_S}{2} \frac{(1+z^{-1})}{(1-z^{-1})} + \frac{K_d}{T_S}(1-z^{-1})\right)
+\end{equation}
+
+Rearrumando a equação \ref{eq:cd_10}
+
+\begin{equation}
+    \label{eq:cd_11}
+    C(z) = \frac{U(z)}{E(z)} = \frac{a+bz^{-1}+cz^{-2}}{1-z^{-1}}
+\end{equation}
+
+onde
+
+\begin{align}
+  a &= K_p + \frac{K_iT_S}{2} + \frac{K_d}{T_S} \nonumber\\
+  b &= -K_p + \frac{K_iT_S}{2} - \frac{2K_d}{T_S} \nonumber\\
+  c &= \frac{K_d}{T_S} \nonumber
+\end{align}
+
+Ao tomar a transformada inversa temos a equação de diferenças do controlador.
+
+\begin{equation}
+    \label{eq:cd_12}
+    u[n] = u[n-1] + a.e[n] + b.e[n-1]+c.e[n-2]
+\end{equation}

@@ -34,6 +34,13 @@
 \addtokomafont{labelinglabel}{\sffamily}
 \usepackage{suffix}
 \usepackage[withpage]{acronym} % optional command: printonlyused
+\usepackage{listings}
+\usepackage{color}
+\usepackage{amsmath,amssymb,mathrsfs}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
 
 \onehalfspacing
 
@@ -115,7 +122,7 @@
 % Agradecimentos
 % Se preferir, crie um arquivo à parte e o inclua via \include{}
 \acknowledgements
-    \input{agrad}
+    \input{capitulos/agrad}
 
 % Epígrafe
 % Comente para ocultar
@@ -133,20 +140,12 @@ Não sou obrigado a vencer, mas tenho o dever de ser verdadeiro. Não sou obriga
 % Resumo em Português
 % Se preferir, crie um arquivo à parte e o inclua via \include{}
 \resumo
-\input{resumo.tex}
-% Palavras-chave do resumo em Português
-\begin{keywords}
-    Iluminação, LED, MQTT, ESP8266
-\end{keywords}
+\input{capitulos/resumo}
 
 % Resumo em Inglês
 % Se preferir, crie um arquivo à parte e o inclua via \include{}
 \abstract
-\input{abstract.tex}
-% Palavras-chave do resumo em Inglês
-\begin{keywords}
-    Illumination, LED, MQTT, ESP8266
-\end{keywords}
+\input{capitulos/abstract}
 
 % Sumário
 % Comente para ocultar
@@ -170,10 +169,10 @@ Não sou obrigado a vencer, mas tenho o dever de ser verdadeiro. Não sou obriga
 % É aconselhável criar cada capítulo em um arquivo à parte, digamos
 % "capitulo1.tex", "capitulo2.tex", ... "capituloN.tex" e depois
 % incluí-los:
-\include{intro}
-\include{teoria}
-\include{materiais}
-\include{projeto}
+\include{capitulos/intro}
+\include{capitulos/teoria}
+\include{capitulos/materiais}
+\include{capitulos/projeto}
 
 %%
 %% Parte pós-textual
