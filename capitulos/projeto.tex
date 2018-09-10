@@ -1,14 +1,173 @@
 \chapter{Desenvolvimento do Projeto}
 
-O projeto do sistema de iluminação controlado pela internet foi desenvolvido com o objetivo de apresentar algumas funcionalidades e demonstrar a potencialidade de economia de energia. As funcionalidades propostas foram as de, remotamente, ligar e desligar a iluminação; apresentar dois modos de controle da luminosidade: O modo normal no qual o usuário poderá escolher a intensidade da fita de LED e o modo econômico no qual o sistema levará em conta a iluminação ambiente para manter um nível mínimo, definido pelo usuário, de luminosidade. A demonstração da economia de energia do sistema é baseada na comparação das estimativas do consumo da iluminação com intensidade máxima e do consumo com intensidade controlada automaticamente.
+O projeto do sistema de iluminação controlado pela internet foi desenvolvido com o objetivo de apresentar determinadas funcionalidades e demonstrar a potencialidade de economia de energia. As funcionalidades propostas foram as de, remotamente, ligar e desligar a iluminação; apresentar dois modos de controle da luminosidade: O modo normal no qual o usuário poderá escolher a intensidade da fita de LED e o modo econômico no qual o sistema levará em conta a iluminação ambiente para manter um nível mínimo, definido pelo usuário, de luminosidade. 
 
-\section{Montagem}
+O planejamento do esquema eletrônico foi norteado pelo microcontrolador escolhido e pelas funcionalidades propostas. A descrição dos elementos físicos usados no projeto da lâmpada inteligente pode ser resumida pelo esquema geral do projeto na Figura \ref{esquema}.
+
+\begin{figure}[ht]
+    \begin{center}
+    \includegraphics[width=\textwidth]{figuras/esquema_eletrico.jpg}
+    \end{center}
+    \caption[Esquema geral do projeto da fita de LED MQTT.]{Ilustração do funcionamento do protocolo MQTT com três clientes e o \textit{broker} trocando mensagens pelo tópico "temperatura".}
+    \label{esquema}
+\end{figure}
+
+O modo econômico é baseado no controle automático da intensidade luminosa do ambiente em questão considerando a contribuição da fita de LED e de outras fontes de iluminação. O sistema de controle é realimentado pelo sensor de luminosidade, um resistor dependente de luz cujo valor de resistência diminui com o aumento da intensidade luminosa. O controlador escolhido para o sistema é controlador \acf{PID}. A saída do controlador é tratada como a duração do ciclo ativo do sinal digital que "chaveia" a potência da fita de LED.
+
+A demonstração da economia de energia do sistema é baseada na comparação das estimativas do consumo da iluminação com intensidade máxima e do consumo com intensidade controlada automaticamente.
+
+\section{Funcionalidades}
+
+\subsection{Ligar e Desligar}
+
+O sistema deve ser capaz de ligar e desligar a iluminação de LED por meio da internet, para isso o sistema de iluminação deve se comunicar com as interfaces de usuário, aplicativo móvel e página \textit{web}, e essas têm que manter sincronia desta informação. O tópico MQTT \texttt{"/feeds/onoff"} foi criado para que as interfaces possam publicar comandos para ligar e desligar, e para que possam subscrever as informações publicadas para que, caso uma das interfaces publique um comando a outra interface possa sincronizar-se e mostrar o novo estado para o usuário.
+
+\subsection{Ajuste Manual da Iluminação}
+
+O modo manual de ajuste é caracterizado pela escolha arbitrária da intensidade da fita de LED pelo usuário. A escolha de um valor inteiro de 0 a 100, que deve representar a porcentagem da intensidade máxima da iluminação, é feita por meio de ambas as interfaces ao publicar no tópico \texttt{"/feeds/pwmin"} o valor da intensidade. Assim como no ligamento/desligamento as interfaces também subscrevem esse tópico para manter a informação sincronizada. A seleção do modo de funcionamento é controlado através do tópico \texttt{"/feeds/modo"}.
+
+\subsection{Ajuste Automático}
+
+O modo automático de ajuste consiste no controle da luminosidade pelo sistema com a referência de ajuste, ou \textit{"setpoint"}, escolhida pelo usuário pelo modo manual e com o sinal de realimentação medido por meio do  resistor dependente de luz (LDR). O controlador usado na malha fechada de controle da iluminação é o \acf{PID}. A referência de controle é a tensão medida no LDR no momento que o usuário muda o modo de operação, do modo "Manual" para o modo "Econômico". O sistema deve controlar a intensidade da fita de LED de modo que, combinada com a iluminação ambiente, o sistema possa manter a iluminação no nível escolhido pelo usuário.
+
+\section{Materiais}
+
+\subsection{Alimentação}
+
+A fonte de alimentação elétrica do projeto é uma fonte comercial de 12V/1A de padrão comercial “\textit{bivolt}” com plugue P4. Os 12V fornecidos pela fonte serão partilhados pela fonte de iluminação e pelo sistema embarcado. Um regulador baseado no CI AMS1117 será usado para transformar os 12V da fonte em 5V para alimentar o sistema com o microcontrolador. Esse regulador pode fornecer até 1A que já é mais que o suficiente para o ESP-8266 que consome em torno de 220 mA durante curtos períodos quando está transmitindo via WiFi.
+
+\subsection{Módulo Microcontrolador}
+
+Como mencionado, o microcontrolador escolhido para o projeto é o ESP-8266 que inclui capacidade de comunicação WiFi. A própria fabricante do CI comercializa alguns módulos que facilitam o desenvolvimento com o ESP-8266 com antenas, LED, memória \textit{flash} e outros periféricos. Um desses módulos, o ESP-12 é usado por diversas empresas para fabricarem seus kits de desenvolvimento com ainda mais facilidades para o desenvolvedor. O kit usado neste projeto é “\textit{Wemos D1 Mini}” que conta com conversor USB-serial, regulador de tensão para transformar os 5V DC provenientes da porta "USB" ou da alimentação externa para os 3.3V DC que o ESP-8266 demanda, oscilador, botão para \textit{reset} e conectores para os pinos de entrada e saída.
+
+\begin{table}
+    \centering
+    \label{wemos_dados}
+    \caption{Especificações do kit \textit{Wemos D1 Mini}}
+    \begin{tabular}{ll} 
+        \hline
+        Kit de desenvolvimento          & Wemos D1 Mini  \\ 
+        \hline
+        SoC                             & ESP-8266       \\ 
+        \hline
+        Pinos de I/O digitais           & 11             \\ 
+        \hline
+        Entradas analógicas             & 1 (3,2V máx)   \\ 
+        \hline
+        Clock                           & 80 MHz         \\ 
+        \hline
+        Memória \textit{flash}          & 4 MB           \\
+        \hline
+    \end{tabular}
+\end{table}
+
+O pino de entrada analógica do módulo usado tem uma tensão máxima especificada de 3,2V, apesar de a tensão máxima de entrada do ESP-8266 ser de 1V segundo suas características elétricas \cite{esp}. Isto se deve ao fato de o módulo "\textit{Wemos D1 Mini}" apresentar um divisor de tensão conectado ao pino de entrada analógica do SoC fazendo com que a tensão aplicada a este pino seja mapeada de um intervalo de, 0 a 3,2V no devido pino do módulo, para um intervalo de 0 a 1V no pino do ESP-8266.
+
+\begin{figure}[ht]
+    \begin{center}
+    \includegraphics[width=0.4\textwidth]{figuras/wemos.PNG}
+    \end{center}
+    \caption[Ilustração do módulo \textit{Wemos D1 Mini}.]{Módulo \textit{Wemos D1 Mini} baseado no ESP-8266 visto de cima e de baixo.}
+    \label{wemos}
+\end{figure}
+
+\subsection{Sensor de Luminosidade}
+
+O sensor de luminosidade é um "fotoresistor" ou \acf{LDR} cuja resistência, geralmente, diminui com o aumento da intensidade luminosa linearmente. Geralmente são materiais semicondutores de alta resistividade, mas que quando expostos à luz, têm elétrons liberados em sua camada de condução aumentando assim sua condutividade por isso são geralmente chamados de células fotocondutivas. Existem LDRs sensíveis a faixas de radiação ultravioleta, infravermelho e a luz visível, que são os mais comuns.
+
+O LDR usado \cite{ldr} é feito do material semicondutor CdS e apresenta uma curva de resistência em função da intensidade luminosa como mostrada na figura \ref{reta}. Os valores mostrados podem variar um pouco com a temperatura e existe um comportamento transiente da ordem de 10ms de duração, o que não se torna relevante para medições menos frequentes que uma repetição por minuto, por exemplo.
+
+\begin{figure}[htp]
+    \begin{center}
+    \includegraphics[width=0.4\textwidth]{figuras/reta.PNG}
+    \end{center}
+    \caption[Gráfico da reisitência \textit{versus} intensidade luminos do LDR.]{Gráfico da reisitência \textit{versus} intensidade luminos do LDR.}
+    \label{reta}
+\end{figure}
+
+\subsection{Fita de LED}
+
+A fonte de iluminação é uma fita de LED branca que consiste de elementos de três LEDs e um resistor em série para limitar a corrente, com vários desses elementos ligados em paralelo o que permite que todos os elementos sejam submetidos à mesma tensão e que a fita possa ser cortada em determinados pontos e continue funcionando. A fita de LED adquirida para o projeto tem as especificações listadas na Tabela 3.2.
+
+\begin{figure}[htb]
+    \begin{center}
+    \includegraphics[width=0.3\textwidth]{figuras/fitaled.PNG}
+    \end{center}
+    \caption[Ilustração da fita de LED branca.]{Ilustração da fita de LED de cor branca fria de 12V.}
+    \label{fitaled}
+\end{figure}
+
+ 
+
+\begin{table}[hbt]
+    \centering
+    \label{fitaled_dados}
+    \caption{Especificações da fita de LED branca}
+    \begin{tabular}{ll} 
+        \hline
+        Tensão de Operação (V)  & 12            \\ 
+        \hline
+        Consumo por metro (W/m) & 4.8           \\ 
+        \hline
+        Comprimento (m)         & 5             \\ 
+        \hline
+        LEDs por metro          & 60            \\ 
+        \hline
+        Temperatura da cor (K)  & 6000(frio)    \\
+        \hline
+    \end{tabular}
+\end{table}
+
+O controle da luminosidade será feito por chaveamento da alimentação da fita de LED com \acf{PWM}, técnica que permite controlar digitalmente a potência entregue a atuadores ao determinar a parcela do período em nível lógico alto, de um sinal alternado. O microcontrolador irá chavear um transistor \textit{darlington} “TIP122” \cite{tip122}.
+
+\section{Ferramentas}
+
+\subsection{\textit{Broker} MQTT}
+
+O \textit{broker}, ou servidor, MQTT responsável pelo controle das mensagens intercambiadas na rede será o \textit{broker} da "\textit{Adafruit}" \cite{adafruit}. O serviço oferecido pela \textit{Adafruit} conta com um  \textit{broker} MQTT configurado com níveis de QoS 0 e 1, tópicos especiais como o "\texttt{time/seconds}" que fornece um número de segundos passados desde primeiro de janeiro de 1970 (\textit{Unix Time}) ou o tópico "\texttt{(username)/throttle}" que indica se a limitação de frequência de publicações foi atingida (que na versão grátis do serviço é de 30 vezes por minuto). O seviço da \textit{Adafruit} fornece também uma biblioteca da MQTT própria para \textit{Arduino} que define várias funções de \textit{callback} de subscrições e rotinas de conexão, desconexão e outras.
+
+Uma interface de controle e visualização \textit{web} também é fornecida pela \textit{Adafruit} com possibilidade de implementação de botões, mostradores de valores, gráficos em tempo real, entre outras funcionalidades.
+
+\subsection{Ambiente de Desenvolvimento de \textit{Software}}
+
+O ESP-8266 possui um conjunto de bibliotecas e ferramentas, cujo objetivo é produzir código que, quando compilado, pode ser gravado na memória de programa e executado. Essas ferramentas levam o nome de "SDK" (\textit{Software Development Kit}) e são fornecidas, oficialmente, pela fabricante \textit{Espressif}. Uma comunidade de desenvolvedores do ESP-8266 criou uma estrutura de interfaces e adaptações (\textit{framework}) de código aberto para a SDK oficial para que fosse possível programar com a linguagem "C++" e usar as bibliotecas do \textit{Arduino}.
+
+O desenvolvimento do software foi feito na IDE (\textit{Integrated Development Environment}) "\textit{Visual Studio Code}" da "\textit{Microsoft}" que é essencialmente um editor de texto de código aberto, muitas opções de customização e capacidade de conexão com extensões de terceiros. Uma dessas extensões foi usada, o "PlatformIO", Figura \ref{pio}, que é uma plataforma que conta com compiladores e outras ferramentas de diversos microcontroladores como \textit{Arduino}, ARM, \textit{Atmel} e vários outros. A extensão conta ainda com terminal virtual, monitor de porta serial, ferramentas de depuração de código e suporte à versionamento de código online.
+
+\begin{figure}[ht]
+    \begin{center}
+    \includegraphics[width=\textwidth]{figuras/pio.PNG}
+    \end{center}
+    \caption[Ilustração do Visual Studio Code com o PlatformIO.]{Ilustração do ambiente de desenvolvimento "Visual Studio Code" com a extensão "PlatformIO".}
+    \label{pio}
+\end{figure}
+
+\subsection{Bibliotecas}
+
+Como mencionado, a programação foi feita na linguagem de programação "C++" com algumas bibliotecas de terceiros. A primeira a ser mencionada é a biblioteca do \textit{Arduino} que disponibiliza várias funções e definições que permitem uma grande simplicidade legibilidade do código escrito \cite{arduino}.
+
+Outra biblioteca usada foi "Esp8266WiFi" \cite{espwifi}que disponibiliza várias rotinas relativas a conexão do ESP-8266 como a rede WiFi, reconexão, códigos relativos a camada TCP/IP e outros detalhes importantes para que o uso da internet com o microcontrolador seja possível.
+
+A biblioteca "WiFi \textit{Manager}" \cite{wifimng} foi também usada e permitiu automatizar e generalizar o processo de autenticação do projeto para qualquer rede WiFi por meio da criação de uma página \textit{web} pela qual o usuário pode escolher a rede desejada e informar sua senha para que o ESP-8266 se conecte e salve essas informações em caso de reconexão.
+
+\section{Metodologia}
+
+Dadas as funcionalidades e características desejadas para o sistema, e os materiais e ferramentas, serão descritos agora os procedimentos e métodos na produção do arranjo físico, eletrônico do projeto, do firmware do microcontrolador e configuração das interfaces.
+
+\subsection{Montagem}
 
 Os principais componentes e materiais usados no projeto já foram descritos no capítulo 3. O esquema elétrico foi pensado com o objetivo de fazer com que o sistema atendesse às funcionalidades propostas.
 
 % FIGURA NO FRITZING DA PROTOBOARD
+\begin{figure}[ht]
+    \begin{center}
+    \includegraphics[width=\textwidth]{figuras/fritzproto.PNG}
+    \end{center}
+    \caption[Ilustração da placa de circuito protótipo do sistema de iluminação.]{Ilustração da placa de circuito protótipo do sistema de iluminação.}
+    \label{fproto}
+\end{figure}
 
-A lista completa de materiais usados no projeto:
+A lista completa de materiais usados no projeto é detalhada na tabela \ref{BOM}.
 
 \begin{table}
     \centering
@@ -31,156 +190,83 @@ A lista completa de materiais usados no projeto:
         \hline
         TIP122 Transistor \textit{Darlington} NPN                      & 1           \\ 
         \hline
-        Resistor $10K\Omega$                                           & 1           \\ 
+        Resistor $4,7K\Omega$                                          & 1           \\ 
         \hline
         Resistor $220\Omega$                                           & 1           \\ 
         \hline
         Conector P4 macho                                              & 1           \\
         \hline
+        Conector P4 fêmea                                              & 1           \\
+        \hline
     \end{tabular}
 \end{table}
 
-O esquema eletrônico dos componentes é mostrado na Figura X e ilustrado na Figura Y conforme montado na \textit{protoboard}.
+O esquema eletrônico dos componentes é mostrado na Figura \ref{fsch} e ilustrado na Figura \ref{fproto} conforme montado na \textit{protoboard}.
 
-FIGURA X ESQUEMATICO
+\begin{figure}[ht]
+    \begin{center}
+    \includegraphics[width=\textwidth]{figuras/fritzsch.PNG}
+    \end{center}
+    \caption[Ilustração do esquemático eletrônico do circuito do sistema de iluminação.]{Ilustração do esquemático eletrônico do circuito do sistema de iluminação.}
+    \label{fsch}
+\end{figure}
 
-FIGURA Y PROTOBOARD
+O pino de entrada analógico do \textit{Wemos D1 Mini} suporta tensões de 0 a 3,2V. O conversor analógico-digital neste pino tém resolução de 10 \textit{bits} e, por isso, apresenta resolução de 1024 níveis de tensão igualmente espaçados cada um com aproximadamente 3 mV.
 
-\section{Programação}
+\begin{equation}
+    \label{eq:pj_1}
+    \Delta V = \frac{3,2}{2^{10}} = 0,003125 V \simeq 3 mV
+\end{equation}
 
-\lstset{
-    frame=tb,
-    language=C++,
-    aboveskip=3mm,
-    belowskip=3mm,
-    showstringspaces=false,
-    columns=flexible,
-    basicstyle={\small\ttfamily},
-    numbers=left,                    
-    numbersep=5pt,                  
-    numberstyle=\tiny\color{gray},
-    keywordstyle=\color{blue},
-    commentstyle=\color{dkgreen},
-    stringstyle=\color{mauve},
-    breaklines=true,
-    breakatwhitespace=true,
-    tabsize=4,
-    captionpos=b
-}
+O divisor de tensão no LDR (o resistor de $4,7K\Omega$ entre a referência de 3.2V e o pino de entrada analógico, e o LDR entre este pino e o referencial de terra) faz com que quando sua resistência é da ordem de $100K\Omega$, situação característica de iluminação muito baixa ou escuro como na figura \ref{reta}, mais de $90\%$ da tensão caia sobre o LDR e quando sua resistência é da ordem de $100\Omega$, com iluminação intensa, menos de $10\%$ da tensão caia sobre o LDR. Portanto a configuração do divisor de tensão permite uma excursão satisfatória da medição da intensidade da iluminação.
 
-Conforme descrito no capítulo 3, a codificação do microcontrolador foi desenvolvida usando a linguagem "C++" compilado com a extensão do \textit{Arduino} junto com as bibliotecas e compilador oficiais da \textit{Espressif}. O código foi escrito no ambiente \textit{Visual Studio Code} com a ferramenta de sistemas embarcados \textit{PLatformIO}.
+Um resistor de $220\Omega$ é conectado à base do transistor \textit{darlington} TIP122 para garantir uma corrente de base suficiente para saturá-lo quando necessário.
 
-\subsection{Cabeçalho}
+O sistema de iluminação foi montado numa caixa de dimensões M x N x H e interior branco para simular uma sala de formato retangular e facilitar a mobilidade do protótipo para demonstrações.
 
-O cabeçalho do código contém declarações de bibliotecas, variáveis, constantes e macros.
+\subsection{Programação}
 
-\begin{lstlisting}
+Conforme descrito, a codificação do microcontrolador foi desenvolvida usando a linguagem "C++" compilada com a extensão do \textit{Arduino} junto com as bibliotecas e compilador oficiais da \textit{Espressif}. O código foi escrito no ambiente \textit{Visual Studio Code} com a ferramenta de sistemas embarcados \textit{PLatformIO}.
 
-/************************** Libraries ***************************/
-#include <Arduino.h>
-#include <ESP8266WiFi.h>
-#include "Adafruit_MQTT.h"
-#include "Adafruit_MQTT_Client.h"
+\subsubsection{Inicialização e Conexão}
 
-// Includes do Wifi Manager
-#include <DNSServer.h>
-#include <ESP8266WebServer.h>
-#include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
+Inicialmente o programa declara variáveis, faz definições de constantes e cria objetos das classes próprias das bibliotecas de \ac{WiFi} e \ac{MQTT}. Após as declarações, o sistema deve agora conectar-se à internet e para isso carrega as credenciais (senha e nome) da rede, a qual já tenha se conectado anteriormente, salvas na memória \textit{flash}. Caso não consiga, o sistema entra no modo de ponto de acesso (com uma rede WiFi configurada pelo próprio microcontrolador) e cria uma página de configuração no endereço de internet "192.168.4.1" e, quando o usuário conecta-se a essa página, este pode informar ao sistema qual das redes disponíveis deve se conectar e sua senha. O sistema então tenta conectar-se a rede escolhida e, caso consiga, salva as credenciais e prossegue à sessão do programa que executa as funcionalidades. 
 
-/********************* WiFi Access Point *************************/
+\begin{figure}[ht]
+    \begin{center}
+    \includegraphics[width=0.4\textwidth]{figuras/flux_init.png}
+    \end{center}
+    \caption[Diagrama de fluxo da inicialização e conexão do sistema.]{Diagrama de fluxo da inicialização e conexão do sistema.}
+    \label{finit}
+\end{figure}
 
-#define WLAN_SSID       "GVT-4238"
-#define WLAN_PASS       "6703003118"
+\subsubsection{\textit{Loop} Principal}
 
-/********************* Adafruit.io Setup *************************/
+Antes de entrar no \textit{loop} principal são feitas as subscrições nos tópicos do protocolo MQTT. O programa então checa a conexão com o servidor e, caso não esteja conectado são feitas três tentativas de conexão e se não conseguir reconectar-se, o sistema é reiniciado. Após este passo, o programa espera por um tempo de cinco segundos por publicações nos tópicos subscritos, tais publicações são tratadas por rotinas específicas, chamadas de \textit{"callbacks"}, explicadas mais adiante. Caso o modo de funcionamento seja o "Econômico", o programa ajusta a intensidade com o controlador PID. Enfim a intensidade atual é publicada no tópico \texttt{"/pwmout"}, para que seja feito o acompanhamento do consumo, e volta a checar a conexão com o servidor completando um \textit{loop} de execução.
 
-#define AIO_SERVER      "io.adafruit.com"
-#define AIO_SERVERPORT  1883
-#define AIO_USERNAME    "RafaelMQ"
-#define AIO_KEY         "f6ed222e222c446088110578b7bd0146"
+\begin{figure}[ht]
+    \begin{center}
+    \includegraphics[width=0.4\textwidth]{figuras/flux_loop.png}
+    \end{center}
+    \caption[Diagrama de fluxo do ciclo de repetição principal do programa.]{Diagrama de fluxo do ciclo de repetição principal do programa.}
+    \label{floop}
+\end{figure}
 
-/********************* PIN DEFINITIONS **************************/
-#define USER_LED D1
+\subsubsection{Rotinas de \textit{Callback}}
 
-#define pwm_map_n(x) round(map(x, 0, 100, 0, 1023))
+O \textit{loop} principal possui uma rotina de espera por publicações onde o programa monitora o servidor por publicações nos tópicos subscritos; tal rotina deve ser onde o programa passa a maior parte do tempo e caso uma publicação ocorra e o programa não esteja preparado, esta é perdida e só pode eventualmente ser recebida por reenvio da mensagem publicada (problema coberto nos níveis de QoS 1 e 2).
 
-/************** GLOBAL STATE (don't change this!) ***************/
+O recebimento de uma publicação desencadeia a execução de rotinas próprias de cada tópico subscrito, chamadas \textit{"callbacks"}. Tais funções recebem os dados da publicação e os processa para definir o comportamento do sistema de iluminação e então retorna à rotina de espera de publicações.
 
-// Create an ESP8266 WiFiClient class to connect to the MQTT server.
-WiFiClient client;
+A função de \textit{callback} do tópico \texttt{"/onoff"} recebe o dado na forma de texto (\textit{string}) que pode ter dois valores "ON" ou "OFF", no primeiro caso o sistema aplica a instensidade por PWM definida previamente e retorna, e no segundo caso o sistema desliga a iluminação aplicando intensidade nula e retorna. A função de \textit{callback} do tópico \texttt{"/modo"} tem como objetivo selecionar o modo de funcionamento ("Normal" com ajuste manual ou "Econômico" com ajuste automático) e salvar a referência de iluminação (\textit{setpoint}) do modo automático de ajuste. A função de \textit{callback} do tópico \texttt{"/pwmin"} salva o dado de intensidade recebido, e caso o sistema já esteja ligado, aplica essa intensidade e salva o \textit{setpoint}, e então retorna.
 
-// Setup the MQTT client class by passing in the WiFi client and MQTT server and login details.
-Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_USERNAME, AIO_KEY);
-
-/************************ Feeds ********************************/
-
-Adafruit_MQTT_Subscribe timefeed = Adafruit_MQTT_Subscribe(&mqtt, "time/seconds");
-
-// Setup a feed called 'pwmin' for subscribing to changes on the slider
-Adafruit_MQTT_Subscribe pwmin = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/pwmin");
-
-// Setup a feed called 'onoff' for subscribing to changes to the button
-Adafruit_MQTT_Subscribe onoffbutton = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/onoff");
-
-Adafruit_MQTT_Publish pwmout = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/pwmout");
-
-/********************* Variables *****************************/
-int sec;
-int minute;
-int hour;
-
-int timeZone = -3; // utc-3 eastern daylight time (brasilia)
-
-int global_pwm = 100;
-bool led_state = false;
-
-\end{lstlisting}
-
-As definições da seção \textit{"Adafruit.io Setup"} são dados próprios da conta do usuário do serviço da \textit{Adafruit}. As declarações da seção \textit{"Global State"} configuram o sistema na rede MQTT do serviço da \textit{Adafruit}. A seção de \textit{"Feeds"} se baseia nos exemplos da documentação de MQTT da \textit{Adafruit} e declara objetos das classes \textit{Subscribe} e \textit{Publish}. E na seção \textit{"Variables"} temos a declaração das variáveis usadas no código.
-
-\subsection{Função \textit{setup()}}
-
-A função \textit{setup()} é chamada no começo da execução do programa apenas uma vez, por isso é responsável por realizar configurações e preparações para o restante da execução do programa.
-
-\begin{lstlisting}
-void setup() {
-    pinMode(USER_LED, OUTPUT);
-    Serial.begin(115200);
-    delay(10);
-
-    Serial.println("Lampada mqtt");
-
-    // Connect to WiFi access point. 
-    // WiFiManager.
-    // Local intialization. Once its business is done, there is no need to keep it around
-    Serial.println();
-    Serial.print("Connecting ");
-
-    WiFiManager wifiManager;
-    wifiManager.autoConnect("Fita de LED MQTT", "2018");
-
-    Serial.println("WiFi connected");
-    Serial.println("IP address: "); 
-    Serial.println(WiFi.localIP());
-    Serial.printf(" ESP8266 Chip id = \%08X\n", ESP.getChipId());
-    
-    // Setup subscribes callbacks
-    timefeed.setCallback(timecallback);
-    pwmin.setCallback(pwmincallback);
-    onoffbutton.setCallback(onoffcallback);
-
-    // Setup MQTT subscriptions.
-    mqtt.subscribe(&timefeed);
-    mqtt.subscribe(&pwmin);
-    mqtt.subscribe(&onoffbutton);
-}
-\end{lstlisting}
-
-Inicialmente são inicializados a comunicação serial, que não interfere no funcionamento do sistema e é usada apenas para depuração, e os pinos de entrada e saída, com exceção do pino de entrada analógica pois este têm esta função por padrão e sua inicialização pode ser dispensada se for usada para este propósito. Posteriormente, é executada a rotina de conexão com o uso da função da biblioteca \textit{"WiFiManager"} \cite{wifimng} que tenta se conectar a última rede a qual havia se conectado anteriormente, ao checar o campo da memória reservada para guardar informações de \textit{"SSID"} e senha; caso não consiga, a função coloca o ESP-8266 na configuração de "ponto de acesso" WiFi, com o \textit{SSID} e senha definidos pelos argumentos da função "wifiManager.autoConnect", e cria uma página \textit{web}, aberta automaticamente ao se conectar ao "ponto de acesso", que permite informar ao sistema qual a rede deve se conectar e a senha dessa rede. E em seguida as funções de \textit{"callbacks"}, que são chamadas quando ocorre uma publicação nos tópicos subscritos, são atreladas aos objetos de subscrição da classe MQTT. Por fim, faz-se a subscrição nos tópicos
-
-\section{Interfaces de Usuário}
-
-O projeto do sistema de iluminação controlado via internet tem duas interfaces de usuário. A interface principal é um aplicativo móvel para o sistema \textit{Android} e a interface \textit{web} é uma funcionalidade oferecida pelo serviço da \textit{Adafruit}.
+\begin{figure}[ht]
+    \begin{center}
+    \includegraphics[width=0.8\textwidth]{figuras/flux_cb.png}
+    \end{center}
+    \caption[Diagrama de fluxo das rotinas de \textit{callback}.]{Diagrama de fluxo das rotinas de \textit{callback} dos tópicos \texttt{"/onoff"}, \texttt{"/pwmin"} e \texttt{"/modo"}.}
+    \label{fcb}
+\end{figure}
 
 \subsection{Aplicativo Móvel}
 
@@ -196,9 +282,9 @@ A interface criada para este projeto conta com três \textit{widgets}: Um botão
     \label{appdash}
 \end{figure}
 
-O botão "ON/OFF" pode ligar e desligar a iluminação ao publicar os valores "0" e "1", respectivamente, no tópico \texttt{"RafaelMQ/feeds/onoff"} e apresenta um visual lúdico; quando se encontra no estado "1" mostra a figura de uma "lâmpada acesa" e quando no estado "0" mostra a figura de uma "lâmpada apagada". 
+O botão "ON/OFF" pode ligar e desligar a iluminação ao publicar os valores "ON" e "OFF", respectivamente, no tópico \texttt{"/onoff"} e apresenta um visual lúdico: Quando se encontra no estado "ON" mostra a figura de uma "lâmpada acesa" e quando no estado "OFF" mostra a figura de uma "lâmpada apagada". 
 
-A estrutura que permite arbitrar a intensidade da iluminação, chamado no aplicativo de "\textit{slider}", publica e subscreve no tópico \texttt{"RafaelMQ/feeds/pwmin"} valores inteiros no intervalo de "0" a "100" representando a porcentagem da intensidade máxima. O \textit{widget} "Modo" publica no tópico \texttt{"RafaelMQ/feeds/modo"} e serve para selecionar o modo de funcionamento dentre as opções "Econômico", e "Normal". 
+A estrutura que permite arbitrar a intensidade da iluminação, chamado no aplicativo de "\textit{slider}", publica e subscreve no tópico \texttt{"/pwmin"} valores inteiros no intervalo de "0" a "100" representando a porcentagem da intensidade máxima. O \textit{widget} "Modo" publica no tópico \texttt{"/modo"} e serve para selecionar o modo de funcionamento dentre as opções "Econômico", e "Normal". 
 
 \subsection{Interface \textit{Web}}
 
@@ -213,3 +299,10 @@ A interface \textit{web} é uma das funcionalidades ofertadas pelo serviço da \
 \end{figure}
 
 O comportamento e funcionamento dos \textit{widgets} da interface \textit{web} é bastante similar ao dos \textit{widgets} da aplicação móvel com as mesmas estruturas de ligar e desligar, alterar a intensidade da iluminação e selecionar o modo de operação.
+
+\subsection{Controle Automático de Luminosidade}
+
+O controle automático de luminosidade será feito por uma malha fechada com um controlador PID digital no modo de funcionamento "Econômico". A referência do controlador \acf{PID} é definida como sendo a medida da tensão no sensor de luminosidade no momento da ativação do modo econômico ou a partir da escolha da luminosidade desejada pelo usuário. O erro é calculado a cada iteração do programa como a diferença entre a tensão de referência, ou \textit{setpoint}, e a  medida da tensão no sensor de luminosidade; e além do erro instantâneo, também são usados os valores de erro das duas últimas iterações segundo a equação \ref{eq:cd_12}.
+
+Alguns ajustes são feitos em função das limitações do controlador: A luminosidade não pode ser controlada acima da capacidade máxima do sistema nem abaixo da capacidade mínima. Variações mínimas da luminosidade são ignoradas.
+

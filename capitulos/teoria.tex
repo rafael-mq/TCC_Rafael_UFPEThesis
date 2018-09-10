@@ -309,7 +309,7 @@ Para o sistema de controle da Figura \ref{condig}, onde $C(z)$ e $P(z)$ sâo as 
 
 \subsection{PID Digital}
 
-O controle PID (Proporcional Integral Derivativo) é largamente utilizado como controlador por seu desempenho satisfatório e relativa simplicidade de implementação. Ele consiste da soma de três componentes, uma proporcional ao erro, um componente integrativa do erro e uma componente derivativa do erro Sua modelagem em tempo discreto pode ser vista a seguir. A componente proporcional do erro é simplesmente
+O controle \acf{PID} é largamente utilizado como controlador por seu desempenho satisfatório e relativa simplicidade de implementação. Ele consiste da soma de três componentes, uma proporcional ao erro, um componente integrativa do erro e uma componente derivativa do erro. Sua modelagem em tempo discreto pode ser vista a seguir. A componente proporcional do erro é simplesmente
 
 \begin{equation}
     \label{eq:cd_6}
@@ -321,18 +321,18 @@ O controle PID (Proporcional Integral Derivativo) é largamente utilizado como c
     U_p(z) = K_pE(z)
 \end{equation}
 
-O controle integral é baseado na aproximação da integração do erro ao longo do tempo. Dentre as estratégias de aproximação da integração de sinais existentes, a mais comum é a trapezoidal que calcula a área do sinal entre duas amostras consecutivas como a área do trapézio caracterizado pelos valores das amostras, "$e[n]$" e "$e[n-1]$", como a base maior e a menor, e o tempo de amostragem "$T_s$" como sua altura.
+A componente integral é baseada na aproximação da integração do erro ao longo do tempo. Dentre as estratégias existentes de integração de sinais digitais, a mais comum é a trapezoidal que calcula a área do sinal entre duas amostras consecutivas como a área do trapézio caracterizado pelos valores das amostras, "$e[n]$" e "$e[n-1]$", como a base maior e a menor, e o tempo de amostragem "$T_s$" como sua altura.
 
 \begin{equation}
     \label{eq:cd_7}
     A[n] = \frac{T_s}{2} (e[n]+e[n-1])
 \end{equation}
 
-Portanto o valor da integração do sinal de controle é
+Portanto o valor da componente integrativa do controle PID calculada pela integração do sinal de controle resultante da soma das áreas é
 
 \begin{equation}
     \label{eq:cd_8}
-    u_i[n] = u_i[n-1] + \frac{T_s}{2} (e[n]+e[n-1])
+    u_i[n] = u_i[n-1] + \frac{K_iT_s}{2} (e[n]+e[n-1])
 \end{equation}
 
 

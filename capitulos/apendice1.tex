@@ -1,0 +1,85 @@
+\chapter{Código Fonte}
+
+\lstset{
+    frame=tb,
+    language=C++,
+    aboveskip=3mm,
+    belowskip=3mm,
+    showstringspaces=false,
+    columns=flexible,
+    basicstyle={\small\ttfamily},
+    numbers=left,                    
+    numbersep=5pt,                  
+    numberstyle=\tiny\color{gray},
+    keywordstyle=\color{blue},
+    commentstyle=\color{dkgreen},
+    stringstyle=\color{mauve},
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=4,
+    captionpos=b
+}
+
+hahahahahahahaha
+
+\begin{lstlisting}
+
+/************************** Libraries ***************************/
+#include <Arduino.h>
+#include <ESP8266WiFi.h>
+#include "Adafruit_MQTT.h"
+#include "Adafruit_MQTT_Client.h"
+
+// Includes do Wifi Manager
+#include <DNSServer.h>
+#include <ESP8266WebServer.h>
+#include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
+
+/********************* WiFi Access Point *************************/
+
+#define WLAN_SSID       "GVT-4238"
+#define WLAN_PASS       "6703003118"
+
+/********************* Adafruit.io Setup *************************/
+
+#define AIO_SERVER      "io.adafruit.com"
+#define AIO_SERVERPORT  1883
+#define AIO_USERNAME    "RafaelMQ"
+#define AIO_KEY         "f6ed222e222c446088110578b7bd0146"
+
+/********************* PIN DEFINITIONS **************************/
+#define USER_LED D1
+
+#define pwm_map_n(x) round(map(x, 0, 100, 0, 1023))
+
+/************** GLOBAL STATE (don't change this!) ***************/
+
+// Create an ESP8266 WiFiClient class to connect to the MQTT server.
+WiFiClient client;
+
+// Setup the MQTT client class by passing in the WiFi client and MQTT server and login details.
+Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_USERNAME, AIO_KEY);
+
+/************************ Feeds ********************************/
+
+Adafruit_MQTT_Subscribe timefeed = Adafruit_MQTT_Subscribe(&mqtt, "time/seconds");
+
+// Setup a feed called 'pwmin' for subscribing to changes on the slider
+Adafruit_MQTT_Subscribe pwmin = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/pwmin");
+
+// Setup a feed called 'onoff' for subscribing to changes to the button
+Adafruit_MQTT_Subscribe onoffbutton = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/onoff");
+
+Adafruit_MQTT_Publish pwmout = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/pwmout");
+
+/********************* Variables *****************************/
+int sec;
+int minute;
+int hour;
+
+int timeZone = -3; // utc-3 eastern daylight time (brasilia)
+
+int global_pwm = 100;
+bool led_state = false;
+
+\end{lstlisting}
