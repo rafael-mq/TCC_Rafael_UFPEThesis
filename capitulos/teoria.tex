@@ -199,7 +199,7 @@ A \textit{Espressif} comercializa diferentes módulos baseados no ESP8266, numer
 
 \section{Cálculo de Energia}
 
-Comumente sistemas embarcados precisam prover saídas analógicas mas pode ser inviável acoplar um conversor digital-analógico. A principal solução para essa limitação é o uso da chamada "Modulação por Largura de Pulso" (PWM) que é caracterizada por controlar a intensidade ou potência média de um sinal digital pulsado por meio do seu tempo ativo, ou ciclo ativo. A potência média de um sinal contínuo periódico pode ser definida na equação \ref{eq:en_1}.
+Comumente sistemas embarcados precisam prover saídas analógicas mas pode ser inviável acoplar um conversor digital-analógico. A principal solução para essa limitação é o uso da chamada "Modulação por Largura de Pulso" (PWM) que é caracterizada por controlar a intensidade ou potência média de um sinal digital pulsado por meio do seu tempo ativo, ou ciclo ativo. A potência média de um sinal contínuo periódico pode ser definida na Equação \eqref{eq:en_1}.
 
 \begin{equation}
 \label{eq:en_1}
@@ -321,7 +321,7 @@ O controle \acf{PID} é largamente utilizado como controlador por seu desempenho
     U_p(z) = K_pE(z)
 \end{equation}
 
-A componente integral é baseada na aproximação da integração do erro ao longo do tempo. Dentre as estratégias existentes de integração de sinais digitais, a mais comum é a trapezoidal que calcula a área do sinal entre duas amostras consecutivas como a área do trapézio caracterizado pelos valores das amostras, "$e[n]$" e "$e[n-1]$", como a base maior e a menor, e o tempo de amostragem "$T_s$" como sua altura.
+A componente integral é baseada na aproximação da integração do erro ao longo do tempo. Dentre as estratégias existentes de integração de sinais digitais, a estratégia escolhida nesse caso foi a aproximação de \textit{Tustin} que calcula a área do sinal entre duas amostras consecutivas como a área do trapézio caracterizado pelos valores das amostras, "$e[n]$" e "$e[n-1]$", como a base maior e a menor, e o tempo de amostragem "$T_s$" como sua altura.
 
 \begin{equation}
     \label{eq:cd_7}
@@ -338,51 +338,74 @@ Portanto o valor da componente integrativa do controle PID calculada pela integr
 
 \begin{equation}
     \label{eq:cd_8.1}
-    U_i(z) = z^{-1}U_i(z) + \frac{K_iT_s}{2} (E(z)+z^{-1}E(z))
+    U_i(z) = z^{-1}U_i(z) + \frac{K_iT_s}{2} (E(z)+z^{-1}E(z)).
 \end{equation}
 
 \begin{equation}
     \label{eq:cd_8.2}
-    U_i(z) =\frac{K_iT_sE(z)}{2} \frac{(1+z^{-1})}{(1-z^{-1})}
+    U_i(z) =\frac{K_iT_sE(z)}{2} \frac{(1+z^{-1})}{(1-z^{-1})}.
 \end{equation}
 
 Por fim, a parcela derivativa do sinal de controle é
-
 \begin{equation}
     \label{eq:cd_9}
     u_d[n] = \frac{K_d(e[n]-e[n-1])}{T_s}
 \end{equation}
-
 \begin{equation}
     \label{eq:cd_9.1}
-    U_d(z) = \frac{K_dE(z)}{T_s} (1-z^{-1})
+    U_d(z) = \frac{K_dE(z)}{T_s} (1-z^{-1}).
 \end{equation}
 
 Somando-se as parcelas proporcional, integral e derivativa
-
 \begin{equation}
     \label{eq:cd_10}
-    U(z) = U_p(z) + U_i(z) + U_d(z) = E(z)\left(K_p+\frac{K_iT_S}{2} \frac{(1+z^{-1})}{(1-z^{-1})} + \frac{K_d}{T_S}(1-z^{-1})\right)
+    U(z) = U_p(z) + U_i(z) + U_d(z)
 \end{equation}
-
-Rearrumando a equação \ref{eq:cd_10}
-
+\begin{equation}
+    \label{eq:cd_10.1}
+    U(z) = E(z)\left(K_p+\frac{K_iT_S}{2} \frac{(1+z^{-1})}{(1-z^{-1})} + \frac{K_d}{T_S}(1-z^{-1})\right)
+\end{equation}
+e rearrumando a equação \eqref{eq:cd_10.1}
 \begin{equation}
     \label{eq:cd_11}
     C(z) = \frac{U(z)}{E(z)} = \frac{a+bz^{-1}+cz^{-2}}{1-z^{-1}}
 \end{equation}
-
 onde
-
 \begin{align}
   a &= K_p + \frac{K_iT_S}{2} + \frac{K_d}{T_S} \nonumber\\
   b &= -K_p + \frac{K_iT_S}{2} - \frac{2K_d}{T_S} \nonumber\\
-  c &= \frac{K_d}{T_S} \nonumber
+  c &= \frac{K_d}{T_S}. \nonumber
 \end{align}
 
-Ao tomar a transformada inversa temos a equação de diferenças do controlador.
-
+Podemos agora tomar a transformada inversa para obtermos a equação de diferença do controlador
 \begin{equation}
     \label{eq:cd_12}
-    u[n] = u[n-1] + a.e[n] + b.e[n-1]+c.e[n-2]
+    u[n] = u[n-1] + ae[n] + be[n-1]+ce[n-2].
 \end{equation}
+
+\subsection{Sintonia do PID}
+
+Os parâmetros do controlador PID caracterizam o comportamento do controlador e são ajustados com o objetivo de atender certas especificações do projeto quanto a resposta transiente, para isso faz-se a análise da resposta ao degrau. Geralmente deseja-se limitar a amplitude do \textit{overshoot}, fazer com que a variável de controle atinja o valor de referência rapidamente e manter esse estado com o menor nível de oscilação possível (estabilidade). 
+
+Existem métodos analíticos e experimentais de sintonizar os parâmetros do controlador. Métodos analíticos se baseiam na caracterização da planta no domínio da frequência com a determinação dos polos e zeros, e assim, da função de transferência da planta, mas em algumas situações pode ser complexo demais ou inviável levantar informações analiticamente do processo e para isso existem técnicas que permitem sintonizar os parâmetros do controlador com uma caracterização empírica.
+
+Uma dessas técnicas heurísticas é o método de Ziegler-Nichols que consiste em estimar dois parâmetros da planta para sintonizar as constantes proporcional, integral e derivativa. Os parâmetros necessários são o ganho crítico ($K_{cr}$) e o período crítico ($T_{cr}$) que são obtidos ao anular as constantes integral e derivativa, e aumentar gradativamente a constante proporcional até observar a saída do sistema oscilar de forma sustentada, de forma que o ganho crítico é o valor mínimo da constante proporcional para observar tal comportamento e o período crítico é o período da oscilação.
+
+Algumas configurações de sintonia mais comumente usadas estão dispostas na tabela \ref{ZN}.
+
+\begin{table}[htb]
+    \centering
+    \caption{Valores de sintonia de Ziegler-Nichols}
+    \label{ZN}
+    \begin{tabular}{llll}
+    \hline
+    Tipo            & $K_P$        & $K_I$            & $K_D$            \\ 
+    \hline \hline
+    Clássico        & $0,6K_{cr}$  & $1.2K_{cr}/T_{cr}$ & $0.075K_{cr}T_{cr}$ \\ 
+    \hline
+    Overshoot baixo & $0,33K_{cr}$ & $1.2K_{cr}/T_{cr}$ & $0.2K_{cr}T_{cr}$ \\ 
+    \hline
+    Sem overshoot   & $0,2K_{cr}$  & $1.2K_{cr}/T_{cr}$ & $0.2K_{cr}T_{cr}$ \\
+    \hline
+    \end{tabular}
+\end{table}

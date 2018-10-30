@@ -8,7 +8,7 @@ O planejamento do esquema eletrônico foi norteado pelo microcontrolador escolhi
     \begin{center}
     \includegraphics[width=\textwidth]{figuras/esquema_eletrico.jpg}
     \end{center}
-    \caption[Esquema geral do projeto da fita de LED MQTT.]{Ilustração do funcionamento do protocolo MQTT com três clientes e o \textit{broker} trocando mensagens pelo tópico "temperatura".}
+    \caption[Esquema geral do projeto da fita de LED MQTT.]{Esquema geral do projeto da fita de LED MQTT.}
     \label{esquema}
 \end{figure}
 
@@ -75,9 +75,9 @@ O pino de entrada analógica do módulo usado tem uma tensão máxima especifica
 
 O sensor de luminosidade é um "fotoresistor" ou \acf{LDR} cuja resistência, geralmente, diminui com o aumento da intensidade luminosa linearmente. Geralmente são materiais semicondutores de alta resistividade, mas que quando expostos à luz, têm elétrons liberados em sua camada de condução aumentando assim sua condutividade por isso são geralmente chamados de células fotocondutivas. Existem LDRs sensíveis a faixas de radiação ultravioleta, infravermelho e a luz visível, que são os mais comuns.
 
-O LDR usado \cite{ldr} é feito do material semicondutor CdS e apresenta uma curva de resistência em função da intensidade luminosa como mostrada na figura \ref{reta}. Os valores mostrados podem variar um pouco com a temperatura e existe um comportamento transiente da ordem de 10ms de duração, o que não se torna relevante para medições menos frequentes que uma repetição por minuto, por exemplo.
+O LDR usado \cite{ldr} é feito do material semicondutor CdS e apresenta uma curva de resistência em função da intensidade luminosa como mostrada na figura \ref{reta}. Os valores mostrados podem variar um pouco com a temperatura e existe um comportamento transiente da ordem de 10 ms de duração, o que não se torna relevante para medições menos frequentes que uma repetição por minuto, por exemplo.
 
-\begin{figure}[htp]
+\begin{figure}[htb]
     \begin{center}
     \includegraphics[width=0.4\textwidth]{figuras/reta.PNG}
     \end{center}
@@ -218,9 +218,9 @@ O pino de entrada analógico do \textit{Wemos D1 Mini} suporta tensões de 0 a 3
     \Delta V = \frac{3,2}{2^{10}} = 0,003125 V \simeq 3 mV
 \end{equation}
 
-O divisor de tensão no LDR (o resistor de $4,7K\Omega$ entre a referência de 3.2V e o pino de entrada analógico, e o LDR entre este pino e o referencial de terra) faz com que quando sua resistência é da ordem de $100K\Omega$, situação característica de iluminação muito baixa ou escuro como na figura \ref{reta}, mais de $90\%$ da tensão caia sobre o LDR e quando sua resistência é da ordem de $100\Omega$, com iluminação intensa, menos de $10\%$ da tensão caia sobre o LDR. Portanto a configuração do divisor de tensão permite uma excursão satisfatória da medição da intensidade da iluminação.
+O divisor de tensão no LDR (o resistor de $4,7K\Omega$ entre a referência de 3.2V e o pino de entrada analógico, e o LDR entre este pino e o referencial de terra) faz com que quando sua resistência é da ordem de 100 k$\Omega$, situação característica de iluminação muito baixa ou escuro como na figura \ref{reta}, mais de $90\%$ da tensão caia sobre o LDR e quando sua resistência é da ordem de 100 $\Omega$, com iluminação intensa, menos de $10\%$ da tensão caia sobre o LDR. Portanto a configuração do divisor de tensão permite uma excursão satisfatória da medição da intensidade da iluminação.
 
-Um resistor de $220\Omega$ é conectado à base do transistor \textit{darlington} TIP122 para garantir uma corrente de base suficiente para saturá-lo quando necessário.
+Um resistor de 220 $\Omega$ é conectado à base do transistor \textit{darlington} TIP122 para garantir uma corrente de base suficiente para saturá-lo quando necessário.
 
 O sistema de iluminação foi montado numa caixa de dimensões M x N x H e interior branco para simular uma sala de formato retangular e facilitar a mobilidade do protótipo para demonstrações.
 
@@ -302,9 +302,27 @@ O comportamento e funcionamento dos \textit{widgets} da interface \textit{web} �
 
 \subsection{Controle Automático de Luminosidade}
 
-O controle automático de luminosidade será feito por uma malha fechada com um controlador PID digital no modo de funcionamento "Econômico". A referência do controlador \acf{PID} é definida como sendo a medida da tensão no sensor de luminosidade no momento da ativação do modo econômico ou a partir da escolha da luminosidade desejada pelo usuário. O erro é calculado a cada iteração do programa como a diferença entre a tensão de referência, ou \textit{setpoint}, e a  medida da tensão no sensor de luminosidade; e além do erro instantâneo, também são usados os valores de erro das duas últimas iterações segundo a equação \ref{eq:cd_12}. O tempo de amostragem é o tempo de execução de cada \textit{loop} do programa que consiste basicamente no tempo de espera por publicações. Esse tempo foi arbitrado como sendo 2s.
+O controle automático de luminosidade é feito por uma malha fechada com um controlador PID digital no modo de funcionamento "Econômico". A referência do controlador \acf{PID} é definida como sendo a resistência do sensor de luminosidade no momento da ativação do modo econômico ou a partir da escolha da luminosidade desejada pelo usuário. O erro é calculado a cada iteração do programa como a diferença entre o valor de referência, ou \textit{setpoint}, e a  medida da resistência no sensor de luminosidade a cada iteração; e além do erro instantâneo, também são usados os valores de erro das duas últimas iterações segundo a equação \ref{eq:cd_12}. O tempo de amostragem é o tempo de execução de cada \textit{loop} do programa que consiste basicamente no tempo de espera por publicações.
 
-O projeto de um controlador em malha fechada pode levar em conta diversas métricas de desempenho como tempo de estabilização, magnitude de \textit{"overshoot"}, classificação do amortecimento como subamortecido, sobreamortecide e criticamente amortecido, e alguns outros. Existem vários métodos de ajuste das constantes proporcional, derivativa e integral, alguns mais elaborados com métodos de otimização e outros mais simples como o método de "tentativa e erro". Para esse projeto será utilizada a abordagem de "tentativa e erro" com o objetivo principal de minimizar o erro no menor tempo possível, isto significa que os parâmetros serão ajustados para obter um baixo tempo de estabilização.
+O projeto de um controlador em malha fechada pode levar em conta diversas métricas de desempenho como tempo de estabilização, tempo de subida, magnitude de \textit{"overshoot"}, classificação do amortecimento como subamortecido, sobreamortecido e criticamente amortecido, e alguns outros. Existem vários métodos de ajuste das constantes proporcional, derivativa e integral, alguns mais elaborados com métodos de otimização e outros mais simples como o método de "tentativa e erro". Para esse projeto será utilizada a abordagem de "tentativa e erro" de forma sistemática com o método de Ziegler-Nichols, com o objetivo principal de minimizar o erro no menor tempo possível, isto significa que os parâmetros serão ajustados para obter um baixo tempo de subida e estabilização.
 
-Alguns ajustes são feitos em função das limitações do controlador: A luminosidade não pode ser controlada acima da capacidade máxima do sistema nem abaixo da capacidade mínima. Variações mínimas da luminosidade são ignoradas.
+Alguns ajustes são feitos em função das limitações do controlador: A luminosidade não pode ser controlada acima da capacidade máxima do sistema nem abaixo da capacidade mínima. Variações mínimas da luminosidade são ignoradas. Uma das não-linearidades conhecidas do sistema é a transformação da grandeza resistência elétrica do LDR, que varia com a luminosidade incidente sobre ele, e a tensão medida pelo microcontrolador sobre o divisor de tensão do LDR com o resistor fixo,
+\begin{equation}
+    \label{eq:prj1}
+    V_{ADC} = C_{RES}\frac{R_{LDR}}{R_{LDR} + R_1}.
+\end{equation}
+Onde $V_{ADC}$ é o valor numérico da medição da tensão entregue pelo conversor, $R_{LDR}$ é a resistência do LDR, $R_1$ é o valor do resistor fixo do divisor de tensão e $C_{res}$ é a resolução do conversor analógico-digital, e no caso do conversor usado a resolução é de 1024 níveis, portanto os valores entregues pelo conversor serão números inteiros de 0 a 1023. Para contornar essa não-linearidade, o cálculo do valor da resistência do LDR, em função da tensão medida, é realizado em tempo de execução.
+\begin{equation}
+    \label{eq:prj1.1}
+    R_{LDR} = \frac{V_{ADC}R_1}{C_{RES} - V_{ADC}}.
+\end{equation}
 
+Outro método usado para melhorar o desempenho do controlador foi o condicionamento do sinal de luminosidade medido, já que foi observado que mesmo ao medir luminosidade em situação bem estável, este apresentava um ruído de alta frequência que fazia a medição oscilar em torno de um valor médio. Para isso foi utilizador um filtro interpolador de duas medidas já que a maior parte do ruído é caracterizado pela alternância de valores em amostras consecutivas.
+\begin{equation}
+    \label{eq:prj2}
+    H(z) = 0.5(1 + z^{-1}).
+\end{equation}
+
+Um outro típico ajuste usado em controladores PID consiste em limitar a componente integral do controle, que pode assumir valores altos quando o sistema começa a operar ou quando a referência muda bruscamente, efeito também conhecido como \textit{wind-up}. O efeito integral têm como objetivo principal o de eliminar o erro persistente em regime permanente, isto é, a componente constante do erro ao longo do tempo.
+
+Os ajustes e sintonia descritos foram usados no desenvolvimento do algoritmo do controle de luminosidade. As sintonias típicas do método de Ziegler-Nichols serviram como ponto de partida para chegar a uma sintonia com valores aceitáveis de \textit{overshoot}, tempo de estabilização e amplitude de oscilação em regime permanente.
