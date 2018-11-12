@@ -38,21 +38,21 @@ O desempenho do controlador foi avaliado para as três sintonias mais comuns ori
 \end{table}
 
 Os comportamentos obtidos de resposta ao degrau do controlador com as sintonias listadas na Tabela \ref{ZNvalores} podem ser observados nas Figuras \ref{znclass}, \ref{znpo} e \ref{znso} respectivamente.
-\begin{figure}[htb]
+\begin{figure}[ht]
     \begin{center}
     \includegraphics[width=0.75\textwidth]{figuras/znclass.PNG}
     \end{center}
     \caption[Gráfico da sintonia clássica de Ziegler-Nichols.]{Gráfico da resposta ao degrau da sintonia clássica de Ziegler-Nichols com alta oscilação em regime permanente.}
     \label{znclass}
 \end{figure}
-\begin{figure}[htb]
+\begin{figure}[ht]
     \begin{center}
     \includegraphics[width=0.75\textwidth]{figuras/znpo.PNG}
     \end{center}
     \caption[Gráfico da sintonia de Ziegler-Nichols "com pouco overshoot".]{Gráfico da resposta ao degrau da sintonia de Ziegler-Nichols "com pouco overshoot", ainda assim com alta oscilação em regime permanente.}
     \label{znpo}
 \end{figure}
-\begin{figure}[htb]
+\begin{figure}[ht]
     \begin{center}
     \includegraphics[width=0.75\textwidth]{figuras/znso.PNG}
     \end{center}
@@ -67,7 +67,7 @@ Pode-se notar que as sintonias citadas aplicadas ao controlador PID apresentam c
   &K_D = 0,16. \nonumber
 \end{align}
 
-\begin{figure}[htb]
+\begin{figure}[ht]
     \begin{center}
     \includegraphics[width=0.75\textwidth]{figuras/znsint.PNG}
     \end{center}
@@ -75,8 +75,42 @@ Pode-se notar que as sintonias citadas aplicadas ao controlador PID apresentam c
     \label{znsint}
 \end{figure}
 
-\section{Desempenho do controle de luminosidade}
+O método de sintonia de Ziegler-Nichols provou ser útil como um ponto de partida da sintonia do controlador pois o resultado apresentado pelo método não foi satisfatório pois apresentava comportamento instável. A partir do resultado obtido pelo método foram feitos ajustes de modo a trazer o controlador para um comportamento estável e com características desejadas (baixo tempo de estabilização e pequeno \textit{overshoot}).
 
-Outros dois experimentos foram projetados para demonstrar o comportamento do sistema de controle de luminosidade. O primeiro consiste na mudança do referencial de forma arbitrária com cinco passos discretos de valores de resistência entre 9 k$\Omega$ e 5 k$\Omega$. O segundo experimente consiste em variar a iluminação externa de forma arbitrária 
+\subsection{Desempenho do controlador PID}
 
-% \section{Economia de Energia}
+A fim de demonstrar o comportamento do controlador para diversos níveis de luminosidade, diversos níveis de referência foram aplicados ao sistema de forma sequencial começando por um valor maior de luminosidade e diminui por passos discretos até um quarto valor de luminosidade como pode ser observado na Figura \ref{pidstep}. Os valores de luminosidade são representados pela resistência medida do sensor LDR, cuja medida é inversamente proporcional ao valor da luminosidade.
+
+\begin{figure}[ht]
+    \begin{center}
+    \includegraphics[width=0.75\textwidth]{figuras/pidstep.PNG}
+    \end{center}
+    \caption[Gráfico do teste de desempenho do controlador PID.]{Gráfico do teste de desempenho do controlador PID com quatro valores discretos de referência.}
+    \label{pidstep}
+\end{figure}
+
+É importante notar que o desempenho do controlador varia com a região de controle, o que evidencia a não-linearidade já exposta do sistema em função da relação logarítmica da luminosidade medida e da resistência apresentada pelo sensor. Essa relação é apresentada no gráfico disponibilizado na folha de dados do sensor da Figura \ref{reta}, mas a própria folha de dados \cite{ldr} explica que tal comportamento pode variar por diversos fatores como temperatura, fabricação e outros tantos. Portanto é inviável adicionar esse comportamento no modelo de controle. Algumas estratégias de controle como controle adaptativo, controle \textit{fuzzy} e outras abordagens modernas conseguem lidar com esse tipo de não-linearidade, mas no caso desse trabalho decidiu-se adotar uma abordagem clássica PID de forma que o controle fosse ainda estável no pior caso, ainda que não apresentasse uma performance satisfatória.  
+
+\section{Economia de Energia}
+
+O fato de o sistema de iluminação apresentado poder ter sua intensidade luminosa regulada numa escala de zero a cem por cento da luminosidade máxima da fonte luminosa representa, além de outras vantagens, uma capacidade de economia de energia. A percepção humana de luminosidade, assim como a audição, tem um caráter logarítmico e isto significa que variações de luminosidade em um patamar de alta intensidade são percebidas de forma mais pobre do que as mesmas variações em patamares de baixa luminosidade. Muitas vezes, a luminosidade máxima de uma fonte provocaria sensação de intensidade semelhante a 80$\%$ ou 70$\%$ da luminosidade máxima e a possibilidade de regular a intensidade para tais valores menores que o máximo mas ainda confortáveis, pode economizar energia sem comprometer o conforto.
+
+Buscando exemplificar a capacidade de economia de energia de sistema foram analisados dois dias distintos de uso do sistema com o modo econômico em sua maior parte. Os gráficos nas Figuras \ref{gren1} e \ref{gren2} representam, respectivamente, as porcentagens da intensidade máxima do sistema de iluminação momentâneas amostradas a cada trinta segundos durante 24 horas. O primeiro gráfico é do uso durante o dia 23 de outubro e o segundo gráfico é do uso durante o dia 29 de outubro.
+\begin{figure}[htb]
+    \begin{center}
+    \includegraphics[width=0.85\textwidth]{figuras/gren1.PNG}
+    \end{center}
+    \caption[Gráfico do consumo relativo durante o dia 23 de outubro.]{Gráfico do consumo relativo durante o dia 23 de outubro.}
+    \label{gren1}
+\end{figure}
+\begin{figure}[htb]
+    \begin{center}
+    \includegraphics[width=0.85\textwidth]{figuras/gren2.PNG}
+    \end{center}
+    \caption[Gráfico do consumo relativo durante o dia 29 de outubro.]{Gráfico do consumo relativo durante o dia 29 de outubro.}
+    \label{gren2}
+\end{figure}
+
+O sistema permaneceu ligado durante as 24 horas observadas nas duas situações, a potência assumiu valores nulos apenas em momentos em que a luminosidade do ambiente, independente da contribuição da fita de LED, superava o valor de referência e o controlador atingia uma condição de saturação. 
+
+O consumo de energia pode ser representado como um valor relativo ao consumo hipotético da mesma fonte luminosa com capacidade máxima, ou 100\% da intensidade máxima. O cálculo da energia consumida é feito a partir da integração numérica da potência relativa instantânea de acordo com a equação \eqref{eq:en_6}. O valor relativo de energia consumida na primeira situação foi de 46.5\% e na segunda foi de 43.3\%. 
