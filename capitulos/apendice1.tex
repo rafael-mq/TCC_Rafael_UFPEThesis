@@ -7,7 +7,7 @@
     belowskip=3mm,
     showstringspaces=false,
     columns=flexible,
-    basicstyle={\small\ttfamily},
+    basicstyle={\scriptsize\ttfamily},
     numbers=left,                    
     numbersep=5pt,                  
     numberstyle=\tiny\color{gray},
@@ -20,37 +20,42 @@
     captionpos=b
 }
 
+\section{Fluxo Principal - \textit{main.cpp}}
+
 \begin{lstlisting}
 
-/************************** Libraries ***************************/
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_Client.h"
 
-// Includes do Wifi Manager
+// Inclusão do Wifi Manager
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
-#include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
+#include <WiFiManager.h>
 
-/********************* WiFi Access Point *************************/
+// Inclusão das funções do controle PID
+#include "pid_control.h"
 
-#define WLAN_SSID       "GVT-4238"
-#define WLAN_PASS       "6703003118"
-
-/********************* Adafruit.io Setup *************************/
+/************************* Adafruit.io Setup *********************************/
 
 #define AIO_SERVER      "io.adafruit.com"
 #define AIO_SERVERPORT  1883
 #define AIO_USERNAME    "RafaelMQ"
 #define AIO_KEY         "f6ed222e222c446088110578b7bd0146"
 
-/********************* PIN DEFINITIONS **************************/
+/************ ************* PIN DEFINITIONS **********************************/
 #define USER_LED D1
 
-#define pwm_map_n(x) round(map(x, 0, 100, 0, 1023))
+/************ ***** CONSTANTES E EXPRESSÕES PRE-COMPILADAS *******************/
+#define pwm_map(x) round(map(x, 0, 100, 0, 1023))
 
-/************** GLOBAL STATE (don't change this!) ***************/
+#define NORMAL_MODE   1
+#define ECO_MODE    0
+
+#define PWM_PUBLISHING_PERIOD 30
+
+/*********************** Classes do WiFi e do MQTT **************************/
 
 // Create an ESP8266 WiFiClient class to connect to the MQTT server.
 WiFiClient client;
@@ -58,8 +63,9 @@ WiFiClient client;
 // Setup the MQTT client class by passing in the WiFi client and MQTT server and login details.
 Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_USERNAME, AIO_KEY);
 
-/************************ Feeds ********************************/
+/****************************** Feeds ***************************************/
 
+// Setup a feed called 'timefeed' for subscribing to time information
 Adafruit_MQTT_Subscribe timefeed = Adafruit_MQTT_Subscribe(&mqtt, "time/seconds");
 
 // Setup a feed called 'pwmin' for subscribing to changes on the slider
@@ -68,16 +74,281 @@ Adafruit_MQTT_Subscribe pwmin = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/fe
 // Setup a feed called 'onoff' for subscribing to changes to the button
 Adafruit_MQTT_Subscribe onoffbutton = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/onoff");
 
+// Setup a feed called 'led_mode' for subscribing to changes to the functioning mode
+Adafruit_MQTT_Subscribe led_mode = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/modo");
+
+// Setup a feed called 'pwmout' for publishing pwm data
 Adafruit_MQTT_Publish pwmout = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/pwmout");
 
-/********************* Variables *****************************/
+/*************************** Código Principal ********************************/
 int sec;
 int minute;
 int hour;
 
-int timeZone = -3; // utc-3 eastern daylight time (brasilia)
+int timeZone = -3; // utc-3 eastern daylight time (brasília)
 
-int global_pwm = 100;
-bool led_state = false;
+// Inicializa variáveis globais
+int     global_pwm  = 50;
+bool    led_state   = true;
+int     global_mode = NORMAL_MODE;
+int     log_delay = 0;
+
+void timecallback(uint32_t current) 
+{
+    // adjust to local time zone
+    current += (timeZone * 60 * 60);
+
+    // calculate current time
+    sec = current % 60;
+    current /= 60;
+    minute = current % 60;
+    current /= 60;
+    hour = current % 24;
+}
+
+void pwmincallback(double x) 
+{    
+    global_pwm = (uint8_t)round(x);
+    clear_PID();
+    
+    // This controls the desired led intensity
+    if (led_state == true){
+        analogWrite(USER_LED, pwm_map(global_pwm));
+        delay(20);
+        global_setpoint = R(analogRead(A0));
+    }
+}
+
+void onoffcallback(char *data, uint16 len) 
+{
+    const char* on_str = "ON";
+    const char* off_str = "OFF";
+    
+    // Command for turning ON
+    if (strncmp(data, on_str, 2) == 0){  
+        if(!led_state){
+            analogWrite(USER_LED, pwm_map(global_pwm));
+            clear_PID();
+            led_state = true;
+        } 
+    }
+    // Command for turning OFF
+    else if(strncmp(data, off_str, 3) == 0){
+        if(led_state){
+            analogWrite(USER_LED, 0);
+            led_state = false;
+        }        
+    }
+}
+
+void modecallback(char *data, uint16 len)
+{
+    // Command for "Economic Mode"
+    if (data[0] == 'E'){
+        global_mode = ECO_MODE;
+        clear_PID();
+        if(led_state == 1){
+            analogWrite(USER_LED, pwm_map(global_pwm));
+            delay(20);
+            global_setpoint = R(analogRead(A0));
+        }
+    }
+    // Command for "Normal Mode"
+    else if(data[0] == 'N'){
+        global_mode = NORMAL_MODE;
+        if(led_state == 1){
+            analogWrite(USER_LED, pwm_map(global_pwm));
+        }
+    }
+}
+
+// Function to connect and reconnect as necessary to the MQTT server.
+// Should be called in the loop function and it will take care if connecting.
+void MQTT_connect() 
+{
+    int8_t ret;
+
+    // Stop if already connected.
+    if (mqtt.connected()) {
+        return;
+    }
+
+    uint8_t retries = 3;
+    while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
+
+        mqtt.disconnect();
+        delay(10000);  // wait 10 seconds
+        retries--;
+        if (retries == 0) {
+            // basically die and wait for WDT to reset me
+            while (1);
+        }
+    }
+}
+
+void setup() 
+{
+    pinMode(LED_BUILTIN, OUTPUT);
+    analogWriteFreq(1000);
+    delay(10);
+
+    // WiFiManager
+    // Inicialização local do objeto da conexão automática
+    WiFiManager wifiManager;
+
+    // Reseta configurações salvas
+    // wifiManager.resetSettings();
+
+    // Executa processo de conexão automática
+    wifiManager.autoConnect("Fita de Led", "fitadeled");
+
+    // Declara funções de callback das subscrições
+    // OBS as funções de callback podem ter argumentos (double), (uint32) ou
+    // (char*, uint16) 
+    // timefeed.setCallback(timecallback);
+    pwmin.setCallback(pwmincallback);
+    led_mode.setCallback(modecallback);
+    onoffbutton.setCallback(onoffcallback);
+
+    // Subscreve tópicos.
+    // mqtt.subscribe(&timefeed);
+    mqtt.subscribe(&pwmin);
+    mqtt.subscribe(&onoffbutton);
+    mqtt.subscribe(&led_mode);
+}
+
+void loop() 
+{
+    uint32_t pwm_pid = 0; 
+    
+    // Garante que a conexão com o broker MQTT está ativa (realiza a primeira 
+    // conexão e reconecta se preciso).
+    MQTT_connect();
+
+    // Espera o tempo passado como argumentopor publicações nas subscrições 
+    // feitas e chama as funções de callback
+    mqtt.processPackets(1000);
+
+    // Executa o controle PID do modo "Econômico"
+    if((global_mode == ECO_MODE) and (led_state == 1)){
+        pwm_pid = PID_control(global_setpoint);
+        global_pwm = map(pwm_pid, 0, 1023, 0, 100);
+        analogWrite(USER_LED, pwm_pid);
+    }
+    last_time = millis();
+    
+    // Publica o PWM a cada PWM_PUBLISHING_MAXCOUNT ciclos
+    log_delay++;
+    if (log_delay >= PWM_PUBLISHING_PERIOD){
+        log_delay = 0;
+        if (led_state)
+            pwmout.publish(global_pwm);
+        else
+            pwmout.publish(0);
+    }
+}
 
 \end{lstlisting}
+
+\section{Cabeçalho das funções de PID - \textit{pid\_control.h}}
+
+\begin{lstlisting}
+
+# include <Arduino.h>
+
+// Constantes Proporcional, Integral e Derivativa
+# define KP 1
+# define KI 0.08
+# define KD 0.16
+
+// Fator do filtro interpolador e Saturação do Integrador
+# define ALPHA  0.5
+# define WINDUP 100 
+
+// Mapeamento da leitura do ADC no valor de resistência sobre 10
+#define R(x) (long)1000*x/(1024 - x)
+
+// Variáveis globais do PID
+extern signed long     e0, e1;
+extern signed long     acc, deriv;
+extern unsigned long   last_time;
+extern unsigned long   measure, last_measure;
+extern float           control_pwm;
+
+extern int  global_setpoint;
+
+// Funções do PID
+void clear_PID();
+unsigned int PID_control(long SP);
+
+\end{lstlisting}
+
+\section{Código das funções de PID - \textit{pid\_control.cpp}}
+
+\begin{lstlisting}
+
+#include "pid_control.h"
+
+signed long     e0, e1 = 0;
+signed long     acc, deriv = 0;
+unsigned long   last_time;
+unsigned long   measure, last_measure;
+float           control_pwm = 100;
+
+// Valor Inicial do Setpoint
+int  global_setpoint = R(200);
+
+// Reseta variáveis do PID
+void clear_PID()
+{
+    e0 = 0;
+    e1 = 0;
+    acc = 0;
+    deriv = 0;
+    last_measure = global_setpoint;
+    last_time = millis();
+}
+
+// Função que se comporta como o controlador PID
+// Argumento - Setpoint
+// Retorno - Valor que deve ser aplicado ao PWM que controla a luminosidade
+unsigned int PID_control(long SP)
+{
+    // Adquire tempo atual
+    volatile unsigned long now = millis(); 
+    volatile double sample_time = 1;
+
+    // Faz com que o Ts não seja negativo no estouro do timer
+    if((now-last_time) > 0){
+        sample_time = (now - last_time)/1000;
+    }
+    
+    // Mede saída e mapeia em valor de resistência
+    measure = R(analogRead(A0));
+
+    // Filtro passa-baixa pra reduzir ruído do sensor
+    measure = ALPHA*measure + (1-ALPHA)*last_measure;
+
+    e0 = SP - measure;
+    
+    // Avalia parcela integral com saturação (wind-up)
+    acc += sample_time*(e1 + e0)/2;
+    acc = constrain(acc, -WINDUP, WINDUP);
+
+    // Avalia parcela derivativa
+    deriv = (e0 - e1)/sample_time;
+
+    // Avalia a saída do controlador caso o erro seja maior que  0.1*setpoint 
+    if (e0 > 0.1*global_setpoint || e0 < -0.1*global_setpoint){
+        control_pwm += -1*(KP*e0 + KI*acc + KD*deriv);
+        control_pwm = constrain(control_pwm, 0, 1023);
+    }
+
+    // Salva medida, erro e instante de tempo anterior
+    last_measure = measure;
+    e1 = e0;
+    last_time = now;
+    return (unsigned int)round(control_pwm);
+}
+\end{lstlisting}
+
